@@ -20,7 +20,7 @@ copyCountSegments <- function(object) {
              nranges=(range.end - range.start + 1))
 }
 
-plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=.5,lwd=4,...) {
+plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=1,lwd=4,...) {
   if (is.null(cols)) {
     cols <- rep("black",length(x@fx.par$S))
     cols[x@fx.par$S < x@fx.par$d] <- "red"

@@ -9,7 +9,7 @@
 \usage{
 plot.ExomeCopy(x, points = TRUE, cols = NULL, show.legend = TRUE,
 main = "exomeCopy predicted segments", xlab = "genomic position",
-ylab = "normalized read count", xlim = NULL, ylim = NULL, cex = 0.5, lwd = 4, ...)
+ylab = "normalized read count", xlim = NULL, ylim = NULL, cex = 1, lwd = 4, ...)
 }
 \arguments{
   \item{x}{

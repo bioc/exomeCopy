@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{Detection of CNV in exome/targeted sequencing data}
+% \VignetteIndexEntry{CNV detection in exome sequencing data}
 % \VignetteDepends{methods, graphics, IRanges, GenomicRanges, Rsamtools, Biostrings}
 % \VignetteKeyword{CNV}
 
@@ -6,17 +6,34 @@
 \usepackage{natbib}
 \usepackage{Sweave}
 \usepackage{url}
+\usepackage{hyperref}
 \newcommand{\exomeCopy}{\textsf{exomeCopy} }
 
+\textwidth=6.5in
+\textheight=8.5in
+\oddsidemargin=-.1in
+\evensidemargin=-.1in
+\headheight=-.3in
+
 \begin{document}
+
+\setkeys{Gin}{width=0.6\textwidth}
 
 \title{CNV detection in exome sequencing data using the \exomeCopy package}
 \author{Michael Love\\
 \texttt{love@molgen.mpg.de}}
+\date{\today}
+
 \maketitle
 
+<<options,echo=FALSE>>=
+options(width=72)
+@
+
+\tableofcontents
+
 \begin{abstract}
-  \exomeCopy is an R package implementing a hidden Markov model for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data are \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy count and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
+  \exomeCopy is an R package implementing a hidden Markov model\footnote{The manuscript describing the model, M.I. Love, A. Mysickova, R. Sun, V. Kalscheuer, M. Vingron, S.A. Haas, ``Modeling read counts for CNV detection in exome sequencing data'', is under review.} for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data are \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy count and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
 \end{abstract}
 
 \section{Introduction}
@@ -29,13 +46,11 @@ The \exomeCopy package was designed to address the following situation:
   \item Individual samples can be more or less correlated with background read depth and have different dependencies on GC-content.
 \end{itemize}
 
-While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to prepare data for exomeCopy, generate background read depth, simulate CNVs in read count data and recover CNVs using \exomeCopy.  We build a wrapper function for calling the \texttt{exomeCopy} function over multiple chromosomes and samples such that the operations can be assigned across workstations.
+While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to prepare data, generate background read depth, simulate CNVs in read count data and recover CNVs using \exomeCopy.  We build a wrapper function for calling the \texttt{exomeCopy} function over multiple chromosomes and samples such that the operations can be assigned across workstations.
 
 \section{Importing experiment data}
 
-\subsection{Convenience functions}
-
-The genomic range information, read counts and positional covariates (background read depth and GC-content) used by \exomeCopy are stored in a \textit{RangedData} object.  The user must provide genomic ranges of targeted enrichment.  For exome sequencing, one can use exon annotations, which will be discussed in a later section.  The \exomeCopy package provides two convenience functions for preparing the genomic ranges and sample read counts: \texttt{subdivideGRanges} and \texttt{countBamInGRanges}.  In this vignette we will use a prepackaged \textit{RangedData} object containing real exome sequencing read counts.  Due to memory constraints, we cannot construct this object from scratch, but below we demonstrate with a simple example how to construct a \textit{RangedData} object from a BED file describing the targeted region, BAM files for the read mapping and a FASTA file for the reference sequence.
+The necessary genomic range information, read counts and positional covariates (background read depth and GC-content) should be stored in a \textit{RangedData} object.  The user must provide genomic ranges of targeted enrichment.  For exome sequencing, one can use exon annotations, which will be discussed in a later section.  The \exomeCopy package provides two convenience functions for preparing the genomic ranges and sample read counts: \texttt{subdivideGRanges} and \texttt{countBamInGRanges}.  In this vignette we will use a prepackaged \textit{RangedData} object containing real exome sequencing read counts.  Due to memory constraints, we cannot construct this object from scratch, but below we demonstrate with a simple example how to construct a \textit{RangedData} object from a BED file describing the targeted region, BAM files for the read mapping and a FASTA file for the reference sequence.
 
 \subsection{Subdividing targeted regions}
 
@@ -115,7 +130,7 @@ dim(exomecounts)
 exomecounts[1:5,1:3]
 @
 
-The genomic ranges in \texttt{exomecounts} have been filtered such that only ranges with positive read count over the 16 samples are retained.  The range of the 1000 genomic ranges is from 0.8 to 7.8 Mb on chromosome 1.  Plotting the counts for one sample in a region of 1 Mb, one can observe both the irregular spacing of the ranges as well as the non-uniformities in read counts per range.
+The genomic ranges in \texttt{exomecounts} have been filtered such that only ranges with nonzero read count over the 16 samples are retained.  The range of the 1000 genomic ranges is from 0.8 to 7.8 Mb on chromosome 1.  Plotting the counts for one sample in a region of 1 Mb, one can observe both the irregular spacing of the ranges as well as the non-uniformities in read counts per range.
 
 \begin{center}
 <<fig=TRUE>>=
@@ -123,7 +138,7 @@ plot(start(exomecounts),exomecounts$HG00551,xlim=c(0.8e6,1.8e6),xlab="genomic po
 @ 
 \end{center}
 
-\section{Generating background read depth}
+\subsection{Generating background read depth}
 
 In order to run \exomeCopy, we first generate background read depth.  We extract a read counts data frame from the \textit{RangedData} object and divide each sample by its mean read count (column mean).  Our read depth background is the median of these normalized read counts over the 16 samples (row median).  We could at this point also store the standard deviation of the normalized read counts for a measure of read depth deviation at each range, but we will not use this information in this vignette.
 
@@ -140,25 +155,45 @@ The relationship between read counts and GC-content over the ranges varies acros
 exomecounts[["GC.sq"]] <- exomecounts$GC^2
 @
 
-\section{Brief introduction of the \exomeCopy model}
+\section{Brief introduction of the model}
  
 \exomeCopy models the sample read counts on one chromosome, $O$, as emitted observations of a hidden Markov model (HMM), where the hidden state is the copy number of the sample.  The emission distributions $f$ are modeled with negative binomial distributions, as the read counts from high-throughput sequencing are often overdispersed for the Poisson distribution.  
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi) $$
 
-$$ \mu_{ti} = \frac{S_i}{d} ( X_{t*} \cdot \vec{\beta} ) $$
+$$ \mu_{ti} = \frac{S_i}{d} ( X_{t*}^T \beta ) $$
 
-The mean parameter, $\mu_{ti}$, for position $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(X_{t*} \cdot \vec{\beta})$, where $X_{t*}$ is the $t$-th row of $X$.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fitted by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
+The mean parameter, $\mu_{ti}$, for genomic range $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(X_{t*}^T \beta)$, where $X_{t*}$ is the $t$-th row of $X$.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fitted by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
+
+\begin{table}[ht]
+\begin{center}
+\caption{Summary of notation}
+\begin{tabular}{ll}
+\hline
+$O_t$ & observed count of reads in the $t$-th genomic range \\
+$f$ & the emission distribution for read counts \\
+$\mu_{ti}$ & the mean parameter for $f$ at range $t$ in copy state $i$  \\
+$\phi$ & the dispersion parameter for $f$ \\
+$S_i$ & the copy count for state $i$ ($S_i \in \{ 0,1,2,\dots \}$) \\
+$d$ & the expected background copy count (2 for diploid, 1 for haploid) \\
+$X$ & the matrix of covariates for estimating $\mu$ \\
+$Y$ & the matrix of covariates for estimating $\phi$  \\
+$\beta$ & the fitted coefficients for estimating $\mu$ \\
+$\gamma$ & the fitted coefficients for estimating $\phi$  \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
 
 The base model uses a scalar estimate for the dispersion parameter $\phi$ (equivalent to 1/\texttt{size} in the function \texttt{dnbinom}).  An extension of this model also tries to fit the variance using positional information such as the standard deviation of the background read depth stored in a matrix $Y$.
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi_{t}) $$
 
-$$ \phi_{t} = Y_{t*} \cdot \vec{\gamma} $$
+$$ \phi_{t} = Y_{t*}^T \gamma $$
 
 Both $\mu_{ti}$ and $\phi_{t}$ must be positive, so negative estimates are replaced with a small positive number (\texttt{1e-8}).
 
-\section{Simulating CNVs}
+\section{Running \exomeCopy on simulated CNVs}
   
 Next we simulate CNVs in 4 samples representing regions with a copy number of 0,1,3 and 4, relative to a background copy number of 2.  This is accomplished by selecting a fraction of the reads contained in the CNV bounds and removing or doubling them.  The new counts with simulated CNVs are added as new value columns to the \textit{RangedData} object.  We then plot the original counts and the counts within a simulated heterozygous duplication.
 
@@ -187,7 +222,7 @@ abline(v=c(start(bounds),end(bounds)))
 @ 
 \end{center}
 
-\section{Running \exomeCopy}
+\subsection{Running \exomeCopy and inspecting the segmentation}
 
 We can now run \exomeCopy using the read counts for one of the simulated CNV samples.  Later we will show how to write a simple wrapper function to loop the \texttt{exomeCopy} function over multiple chromosomes and samples.  
 
@@ -212,7 +247,7 @@ Calling \texttt{plot} on the \textit{ExomeCopy} object draws segments of constan
 @
 \end{center}
 
-\section{Looping over multiple chromosomes/samples}
+\subsection{Looping \exomeCopy over multiple chromosomes/samples}
 
 In order to apply \exomeCopy to a full dataset of multiple chromosomes and samples, we write a wrapper function \texttt{runExomeCopy}.  This allows for distribution of jobs across workstations, for example.
 
@@ -248,7 +283,7 @@ for (i in 1:4) {
 @ 
 \end{center}
 
-\section{Inspecting model parameters}
+\subsection{Inspecting model parameters}
 
 Finally, we can inspect a number of fitted parameters in the \textit{ExomeCopy} object, such as the $\beta$ vector which is adjusted in optimizing the likelihood of the HMM.  The $\beta$ vector is initialized using a linear regression of counts on the covariates, and this and other initial parameter values can be accessed in the \texttt{init.par} slot of the \textit{ExomeCopy} object.  These coefficients are adjusted while optimizing the likelihood of the HMM.  The final $\beta$ vector and other final parameter values are accessible in the \texttt{final.par} slot.
 
@@ -269,7 +304,7 @@ for (i in 1:4) {
 @
 \end{center}
 
-\section{SessionInfo}
+\section{Session info}
 
 <<>>=
 sessionInfo()
