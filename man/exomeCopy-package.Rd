@@ -13,11 +13,12 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 0.99.0\cr
-    Date: \tab 2011-09-16\cr
+    Version: \tab 0.99.1\cr
+    Date: \tab 2011-10-27\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
-    Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools, Biostrings\cr
+    Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools
+    (>= 1.4.3), Biostrings\cr
   }
 
   exomeCopy fits a hidden Markov model to observed read counts using
@@ -30,7 +31,7 @@
 \references{
   "Modeling read counts for CNV detection in exome sequencing data",
   Michael I. Love, Alena Mysickova, Ruping Sun, Vera Kalscheuer, Martin
-  Vingron, Stefan A. Haas, currently in review. 
+  Vingron, Stefan A. Haas.  Under review. 
 }
 \keyword{ package }
 \seealso{

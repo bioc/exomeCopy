@@ -164,7 +164,7 @@ init.phi="norm")
 \references{
   "Modeling read counts for CNV detection in exome sequencing data",
   Michael I. Love, Alena Mysickova, Ruping Sun, Vera Kalscheuer, Martin
-  Vingron, Stefan A. Haas, currently in review. 
+  Vingron, Stefan A. Haas. Under review. 
 
   References for HMM algorithms and use of HMM for segmentation of
   genomic data by copy number:
