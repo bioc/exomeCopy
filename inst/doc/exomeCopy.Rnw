@@ -19,7 +19,7 @@
 
 \setkeys{Gin}{width=0.6\textwidth}
 
-\title{CNV detection in exome sequencing data using the \exomeCopy package}
+\title{CNV detection in exome sequencing data using \exomeCopy}
 \author{Michael Love\\
 \texttt{love@molgen.mpg.de}}
 \date{\today}
@@ -89,7 +89,7 @@ target.sub
 
 \subsection{Counting reads in genomic ranges}
 
-\texttt{countBamInGRanges} allows the user to count reads from a BAM read mapping file in genomic ranges covering the targeted region.  The function takes as input the BAM filename and a \textit{GRanges} object.  It returns a vector of counts, representing the number of sequenced read starts (leftmost position regardless of strand) with mapping quality above a minimum threshold (default of 1) for each genomic range.  Users should make sure the sequence names in the \textit{GRanges} object are the same as the sequence names in the BAM file (which can be listed using \texttt{scanBamHeader} in the \textsf{Rsamtools} package).  We will count reads using the subdivided genomic ranges in \texttt{target.sub} and store the counts as a new value column, \texttt{sample1}.
+\texttt{countBamInGRanges} allows the user to count reads from a BAM read mapping file in genomic ranges covering the targeted region.  The function takes as input the BAM filename and a \textit{GRanges} object.  It returns a vector of counts, representing the number of sequenced read starts (leftmost position regardless of strand) with mapping quality above a minimum threshold (default of 1) for each genomic range.  Users should make sure the sequence names in the \textit{GRanges} object are the same as the sequence names in the BAM file (which can be listed using \texttt{scanBamHeader} in the \textsf{Rsamtools} package).  The BAM file requires a associated index file (see the man page for \texttt{indexBam} in the \textsf{Rsamtools} package).  We will count reads using the subdivided genomic ranges in \texttt{target.sub} and store the counts as a new value column, \texttt{sample1}.
 
 <<>>=
 bam.file <- system.file("extdata", "mapping.bam", package="exomeCopy")
@@ -149,10 +149,11 @@ C.norm <- sweep(C,2,colMeans(C),"/")
 exomecounts[["bg"]] <- apply(C.norm,1,median)
 @ 
 
-The relationship between read counts and GC-content over the ranges varies across protocols and samples.  It can be roughly approximated per sample using second-order polynomial terms of GC-content.  We store the square of GC-content as a new value column.  Other functions of GC-content could be used as well.  
+The relationship between read counts and GC-content over the ranges varies across protocols and samples.  It can be roughly approximated per sample using second-order polynomial terms of GC-content.  We store the square of GC-content as a new value column.  Other functions of GC-content could be used as well.  We also store the width of the ranges as a value column.
 
 <<>>=
 exomecounts[["GC.sq"]] <- exomecounts$GC^2
+exomecounts[["width"]] <- width(exomecounts)
 @
 
 \section{Brief introduction of the model}
@@ -161,9 +162,9 @@ exomecounts[["GC.sq"]] <- exomecounts$GC^2
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi) $$
 
-$$ \mu_{ti} = \frac{S_i}{d} ( X_{t*}^T \beta ) $$
+$$ \mu_{ti} = \frac{S_i}{d} ( X_{t*} \beta ) $$
 
-The mean parameter, $\mu_{ti}$, for genomic range $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(X_{t*}^T \beta)$, where $X_{t*}$ is the $t$-th row of $X$.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fitted by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
+The mean parameter, $\mu_{ti}$, for genomic range $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(X_{t*} \beta)$, where $X_{t*}$ is the $t$-th row of $X$ and $\beta$ is a column vector of coefficients.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fit by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
 
 \begin{table}[ht]
 \begin{center}
@@ -189,7 +190,7 @@ The base model uses a scalar estimate for the dispersion parameter $\phi$ (equiv
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi_{t}) $$
 
-$$ \phi_{t} = Y_{t*}^T \gamma $$
+$$ \phi_{t} = Y_{t*} \gamma $$
 
 Both $\mu_{ti}$ and $\phi_{t}$ must be positive, so negative estimates are replaced with a small positive number (\texttt{1e-8}).
 
@@ -227,7 +228,7 @@ abline(v=c(start(bounds),end(bounds)))
 We can now run \exomeCopy using the read counts for one of the simulated CNV samples.  Later we will show how to write a simple wrapper function to loop the \texttt{exomeCopy} function over multiple chromosomes and samples.  
 
 <<>>=
-  fit <- exomeCopy(exomecounts["chr1"],sample.name="HG00731.het.dup",X.names=c("bg","GC","GC.sq"))
+  fit <- exomeCopy(exomecounts["chr1"],sample.name="HG00731.het.dup",X.names=c("bg","GC","GC.sq","width"))
   show(fit)
 @
 
@@ -255,7 +256,7 @@ In order to apply \exomeCopy to a full dataset of multiple chromosomes and sampl
 runExomeCopy <- function(idx,rdata,seq.loop,sample.loop) {
   seq.name <- seq.loop[idx]
   sample.name <- sample.loop[idx]
-  exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq"))
+  exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"))
 }
 @ 
 
@@ -296,10 +297,10 @@ If we plot the initial and final $\beta$ vectors from the 4 samples with simulat
 
 \begin{center}
 <<fig=TRUE>>=
-par(mfrow=c(2,2),mar=c(4,3,2,3))
+par(mfrow=c(2,2),mar=c(3,5,1,1))
 for (i in 1:4) {
-  barplot(rbind(fit.list[[i]]@init.par$beta.hat,fit.list[[i]]@final.par$beta),beside=TRUE,col=c("darkgrey","white"))
-  legend("topright",legend=c("initial","final"),fill=c("darkgrey","white"))
+  barplot(rbind(fit.list[[i]]@final.par$beta,fit.list[[i]]@init.par$beta.hat),horiz=TRUE,las=1,beside=TRUE,col=c("white","darkgrey"),xlim=c(-150,350))
+  legend("topright",legend=c("initial","final"),fill=c("darkgrey","white"),cex=.75)
 }
 @
 \end{center}

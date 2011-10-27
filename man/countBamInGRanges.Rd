@@ -17,6 +17,9 @@
 
   The function \code{\link{subdivideGRanges}} can be used first to
   subdivide ranges of different size into ranges of nearly equal width.
+
+  The BAM file requires a associated index file (see the man page for
+  \code{\link{indexBam}} in the Rsamtools package). 
 }
 \usage{
   countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1)
