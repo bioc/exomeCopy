@@ -66,14 +66,4 @@
 
   ## extract read counts from the BAM file in these genomic ranges
   rdata[["sample"]] <- countBamInGRanges(bam.file,target.sub)
-
-  ## finally, we can also calculate and store GC-content for exomeCopy
-  reference.file <- system.file("extdata", "reference.fa", package="exomeCopy")
-  target.dnastringset <- scanFa(reference.file,target.sub)
-  getGCcontent <- function(x) {
-    GC.count <- letterFrequency(x,"GC")
-    all.count <- letterFrequency(x,"ATGC")
-    as.vector(ifelse(all.count==0,NA,GC.count/all.count))
-  }
-  rdata[["GC"]] <- getGCcontent(target.dnastringset)
 }
