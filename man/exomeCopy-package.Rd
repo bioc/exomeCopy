@@ -13,12 +13,13 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 0.99.2\cr
+    Version: \tab 0.99.3\cr
     Date: \tab 2011-10-27\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
     Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools
-    (>= 1.4.3), Biostrings\cr
+    (>= 1.4.3) \cr
+    Suggests: \tab Biostrings\cr
   }
 
   exomeCopy fits a hidden Markov model to observed read counts using
