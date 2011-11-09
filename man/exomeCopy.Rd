@@ -28,8 +28,7 @@
   The GC-content (ratio of G and C bases to total number of bases) for
   the input ranges can be obtained using \code{scanFa} in the Rsamtools
   package to obtain a DNAStringSet object and \code{letterFrequency} in
-  the Biostrings package.  See the example code for
-  \code{\link{countBamInGRanges}}. 
+  the Biostrings package.  See the vignette for an example.
 }
 \usage{
   exomeCopy(rdata, sample.name, X.names, Y.names, fit.var=FALSE, reltol
@@ -103,13 +102,13 @@ init.phi="norm")
 
   The mean parameter \eqn{\mu_{ti}}{mu_ti} is given by:
 
-  \deqn{ \mu_{ti} = \frac{S_i}{d} ( X_{t*} \cdot \vec{\beta} ) }{ mu_ti
-  = (S_i / d)(X_t* beta)}
+  \deqn{ \mu_{ti} = \frac{S_i}{d} ( x_{t*} \vec{\beta} ) }{ mu_ti
+  = (S_i / d)(x_t* beta)}
 
   Here \eqn{S_i} is the i-th possible copy number state, \eqn{d} is the
   expected background copy number (d = 2 for diploid sequence), and
   \eqn{\vec{\beta}}{beta} is a vector of coefficients fitted by the
-  model.  \eqn{X_{t*}}{X_t*} is the t-th row of the matrix \eqn{X}.
+  model.  \eqn{x_{t*}}{x_t*} is the t-th row of the matrix \eqn{X}.
 
   \eqn{\mu}{mu} must be positive, so it is replaced with a small positive
   number if the value is less than zero.
@@ -122,7 +121,7 @@ init.phi="norm")
 
   where
 
-  \deqn{ \phi_{t} = Y_{t*} \cdot \vec{\gamma} }{ phi_t = Y_t* gamma }
+  \deqn{ \phi_{t} = y_{t*} \vec{\gamma} }{ phi_t = y_t* gamma }
 
   or a small positive number if this is less than zero.
   
@@ -162,9 +161,11 @@ init.phi="norm")
   }
 }
 \references{
-  "Modeling read counts for CNV detection in exome sequencing data",
-  Michael I. Love, Alena Mysickova, Ruping Sun, Vera Kalscheuer, Martin
-  Vingron, Stefan A. Haas. Under review. 
+  Love, Michael I.; Mysickova, Alena; Sun, Ruping; Kalscheuer, Vera;
+  Vingron, Martin; and Haas, Stefan A. (2011) "Modeling Read Counts for
+  CNV Detection in Exome Sequencing Data," Statistical Applications in
+  Genetics and Molecular Biology: Vol. 10 : Iss. 1, Article 52. DOI: 10.2202/1544-6115.1732
+  \url{http://www.bepress.com/sagmb/vol10/iss1/art52}.
 
   References for HMM algorithms and use of HMM for segmentation of
   genomic data by copy number:

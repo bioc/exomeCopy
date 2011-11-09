@@ -82,7 +82,7 @@ subdivideIRanges <- function(x,subsize=100) {
   start.pos <- start(x)
   end.pos <- end(x)
   widths <- width(x)
-  nsubranges <- pmax(1,floor(widths/100))
+  nsubranges <- pmax(1,floor(widths/subsize))
   out.start.pos <- numeric(sum(nsubranges))
   out.end.pos <- numeric(sum(nsubranges))
   out.idx <- 1
@@ -101,15 +101,17 @@ subdivideIRanges <- function(x,subsize=100) {
   IRanges(start=out.start.pos,end=out.end.pos)
 }
 
-subdivideGRanges <- function(x,subsize=100) {
+subdivideGRanges <- function (x, subsize=100) 
+{
   if (length(x) == 0) {
     return(x)
   }
-  gr_list <- lapply(levels(seqnames(x)),
-                    function(seqlvl) {
-                      rg <- ranges(x[seqnames(x) == seqlvl])
-                      GRanges(seqnames=seqlvl,
-                              ranges=subdivideIRanges(rg,subsize),seqlengths=seqlengths(x))
-                    })
+  gr_list <- lapply(levels(seqnames(x)), function(seqlvl) {
+    if (!any(seqnames(x) == seqlvl)) {
+      return(GRanges())
+    }
+    rg <- ranges(x[seqnames(x) == seqlvl])
+    GRanges(seqnames = seqlvl, ranges = subdivideIRanges(rg,subsize), seqlengths = seqlengths(x))
+  })
   do.call(c, gr_list)
 }

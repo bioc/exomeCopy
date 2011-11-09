@@ -30,9 +30,11 @@
   Michael Love <love@molgen.mpg.de>
 }
 \references{
-  "Modeling read counts for CNV detection in exome sequencing data",
-  Michael I. Love, Alena Mysickova, Ruping Sun, Vera Kalscheuer, Martin
-  Vingron, Stefan A. Haas.  Under review. 
+  Love, Michael I.; Mysickova, Alena; Sun, Ruping; Kalscheuer, Vera;
+  Vingron, Martin; and Haas, Stefan A. (2011) "Modeling Read Counts for
+  CNV Detection in Exome Sequencing Data," Statistical Applications in
+  Genetics and Molecular Biology: Vol. 10 : Iss. 1, Article 52. DOI: 10.2202/1544-6115.1732
+  \url{http://www.bepress.com/sagmb/vol10/iss1/art52}.
 }
 \keyword{ package }
 \seealso{
