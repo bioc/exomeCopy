@@ -7,7 +7,7 @@
   Plots the predicted copy count segments of an ExomeCopy object
 }
 \usage{
-plot.ExomeCopy(x, points = TRUE, cols = NULL, show.legend = TRUE,
+\method{plot}{ExomeCopy}(x, points = TRUE, cols = NULL, show.legend = TRUE,
 main = "exomeCopy predicted segments", xlab = "genomic position",
 ylab = "normalized read count", xlim = NULL, ylim = NULL, cex = 1, lwd = 4, ...)
 }

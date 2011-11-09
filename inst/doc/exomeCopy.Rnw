@@ -23,7 +23,7 @@
 \maketitle
 
 \begin{abstract}
-  \exomeCopy is an R package implementing a hidden Markov model\footnote{The manuscript describing the model, M.I. Love, A. Mysickova, R. Sun, V. Kalscheuer, M. Vingron, S.A. Haas, ``Modeling read counts for CNV detection in exome sequencing data'', is under review.} for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data are \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy count and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
+  \exomeCopy is an R package implementing a hidden Markov model\footnote{The manuscript describing the model \citep{Love2011Modeling} is listed in the references of this vignette.} for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data are \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy number and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
 \end{abstract}
 
 \tableofcontents
@@ -162,9 +162,9 @@ exomecounts[["width"]] <- width(exomecounts)
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi) $$
 
-$$ \mu_{ti} = \frac{S_i}{d} ( X_{t*} \beta ) $$
+$$ \mu_{ti} = \frac{S_i}{d} ( x_{t*} \beta ) $$
 
-The mean parameter, $\mu_{ti}$, for genomic range $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(X_{t*} \beta)$, where $X_{t*}$ is the $t$-th row of $X$ and $\beta$ is a column vector of coefficients.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fit by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
+The mean parameter, $\mu_{ti}$, for genomic range $t$ and hidden state $i$ is a product of the possible copy number state $S_i$ over the expected copy number $d$ and an estimate of the positional effects on read depth $(x_{t*} \beta)$, where $x_{t*}$ is the $t$-th row of $X$ and $\beta$ is a column vector of coefficients.  The estimated positional effect is a linear combination of background read depth, GC-content, range width, and any other useful covariates which are stored in the matrix $X$, with a row for each range and a column for each covariate.  The coefficients $\beta$ are fit by the model, using the forward equations to assess the likelihood of the HMM over all hidden state paths.  In this way, the normalization and segmentation steps are combined into one step of maximizing the likelihood of the parameters given the data.  The Viterbi algorithm is then applied to provide the most likely path.
 
 \begin{table}[ht]
 \begin{center}
@@ -175,8 +175,8 @@ $O_t$ & observed count of reads in the $t$-th genomic range \\
 $f$ & the emission distribution for read counts \\
 $\mu_{ti}$ & the mean parameter for $f$ at range $t$ in copy state $i$  \\
 $\phi$ & the dispersion parameter for $f$ \\
-$S_i$ & the copy count for state $i$ ($S_i \in \{ 0,1,2,\dots \}$) \\
-$d$ & the expected background copy count (2 for diploid, 1 for haploid) \\
+$S_i$ & the copy number for state $i$ ($S_i \in \{ 0,1,2,\dots \}$) \\
+$d$ & the expected background copy number (2 for diploid, 1 for haploid) \\
 $X$ & the matrix of covariates for estimating $\mu$ \\
 $Y$ & the matrix of covariates for estimating $\phi$  \\
 $\beta$ & the fitted coefficients for estimating $\mu$ \\
@@ -190,7 +190,7 @@ The base model uses a scalar estimate for the dispersion parameter $\phi$ (equiv
 
 $$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi_{t}) $$
 
-$$ \phi_{t} = Y_{t*} \gamma $$
+$$ \phi_{t} = y_{t*} \gamma $$
 
 Both $\mu_{ti}$ and $\phi_{t}$ must be positive, so negative estimates are replaced with a small positive number (\texttt{1e-8}).
 
@@ -229,25 +229,25 @@ abline(v=c(start(bounds),end(bounds)))
 
 \subsection{Running \exomeCopy and inspecting the segmentation}
 
-We can now run \exomeCopy using the read counts for one of the simulated CNV samples.  Later we will show how to write a simple wrapper function to loop the \texttt{exomeCopy} function over multiple chromosomes and samples.  
+We can now run \exomeCopy using the read counts for one of the simulated CNV samples.  Later we will show how to write a simple wrapper function to loop the \texttt{exomeCopy} function over multiple chromosomes and samples.  We specify the possible copy number values with \texttt{S} and the expected copy number state with \texttt{d}.
 
 <<>>=
   fit <- exomeCopy(exomecounts["chr1"],sample.name="HG00731.het.dup",
-                   X.names=c("bg","GC","GC.sq","width"))
+                   X.names=c("bg","GC","GC.sq","width"),S=0:6,d=2)
   show(fit)
 @
 
-After fitting, we call the function \texttt{copyCountSegments} on the \textit{ExomeCopy} object, which provides the segmentation with the predicted copy count and the number of input genomic ranges contained within each segment.  \exomeCopy correctly identifies the segment between 3-4 Mb as having copy count 3 against the background copy count 2.
+After fitting, we call the function \texttt{copyCountSegments} on the \textit{ExomeCopy} object, which provides the segmentation with the predicted copy number and the number of input genomic ranges contained within each segment.  \exomeCopy correctly identifies the segment between 3-4 Mb as having copy number 3 against the background copy number 2.
 
 <<>>=
   copyCountSegments(fit)
 @
 
-Calling \texttt{plot} on the \textit{ExomeCopy} object draws segments of constant predicted copy count as colored horizontal lines and normalized read counts as points.  The vertical lines indicate the start and end of the simulated CNV of copy count 3.
+Calling \texttt{plot} on the \textit{ExomeCopy} object draws segments of constant predicted copy number as colored horizontal lines and normalized read counts as points.  The vertical lines indicate the start and end of the simulated CNV of copy number 3.
 
 \begin{center}
 <<fig=TRUE>>=
-  cols <- c("red","orange","black","deepskyblue","blue")
+  cols <- c("red","orange","black","deepskyblue","blue","blue2","blue4")
   plot(fit,col=cols)
   abline(v=c(start(bounds),end(bounds)))
 @
@@ -261,7 +261,8 @@ In order to apply \exomeCopy to a full dataset of multiple chromosomes and sampl
 runExomeCopy <- function(idx,rdata,seq.loop,sample.loop) {
   seq.name <- seq.loop[idx]
   sample.name <- sample.loop[idx]
-  exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"))
+  exomeCopy(rdata[seq.name],sample.name,
+            X.names=c("bg","GC","GC.sq","width"),S=0:6,d=2)
 }
 @ 
 
@@ -278,7 +279,7 @@ fit.list <- lapply(seq_len(nseqs*nsamples),
                    runExomeCopy,exomecounts,seq.loop,sample.loop)
 @ 
 
-We can visualize the segments of constant predicted copy count for all simulated CNV samples.  The vertical lines indicate the start and end of the simulated CNVs.
+We can visualize the segments of constant predicted copy number for all simulated CNV samples.  The vertical lines indicate the start and end of the simulated CNVs.
 
 \begin{center}
 <<fig=TRUE>>=
