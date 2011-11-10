@@ -21,20 +21,24 @@ copyCountSegments <- function(object) {
 }
 
 plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=1,lwd=4,...) {
-  if (is.null(cols)) {
+  if (length(cols) != length(x@fx.par$S)) {
+    warning("Supplied colors are not the same length as S (copy number states)")
+  }
+  if (is.null(cols) | (length(cols) != length(x@fx.par$S))) {
     cols <- rep("black",length(x@fx.par$S))
     cols[x@fx.par$S < x@fx.par$d] <- "red"
     cols[x@fx.par$S > x@fx.par$d] <- "blue"
   }
   if (is.null(ylim)) ylim <- c(0,5*mean(x@O.norm))
-  if (is.null(xlim)) xlim <- c(as.numeric(start(range(x@ranges))),as.numeric(end(range(x@ranges))))
+  if (is.null(xlim)) xlim <- c(start(range(x@ranges))[[1]],end(range(x@ranges))[[1]])
   plot(0,0,type="n",xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim,main=main,...)
   if (points) {
     points(mid(x@ranges[[1]]),x@O.norm*x@fx.par$d,col=cols[x@path],cex=cex)
   }
   ccs <- copyCountSegments(x)
-  segments(as.numeric(start(ranges(ccs))),ccs$copy.count,
-           as.numeric(end(ranges(ccs))),ccs$copy.count,lwd=lwd,col=cols[match(ccs$copy.count,x@fx.par$S)])
+  segments(start(ranges(ccs))[[1]],ccs$copy.count,
+           end(ranges(ccs))[[1]],ccs$copy.count,lwd=lwd,
+           col=cols[match(ccs$copy.count,x@fx.par$S)])
   if (show.legend) {
     legend("topright",col=rev(cols),pch=1,legend=rev(x@fx.par$S),title="copy count",bg="white",cex=.75)
   }
