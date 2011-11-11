@@ -13,7 +13,7 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 0.99.3\cr
+    Version: \tab 1.1.1\cr
     Date: \tab 2011-10-27\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
