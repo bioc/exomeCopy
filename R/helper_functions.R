@@ -46,7 +46,7 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
 
 countBamInGRanges <- function(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE) {
   rds.counts <- integer(length(granges))
-  seq.names <- as.character(seqlevels(granges))
+  seq.names <- unique(as.character(seqnames(granges)))
   seq.names.in.bam <- names(scanBamHeader(bam.file)[[1]]$targets)
   for (seq.name in seq.names) {
     if (seq.name %in% seq.names.in.bam) {
