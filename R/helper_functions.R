@@ -44,18 +44,26 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
   }
 }
 
-countBamInGRanges <- function(bam.file,granges,min.mapq=1,read.width=1) {
-  rds.counts <- numeric(length(granges))
-  seq.names <- as.character(unique(seqnames(granges)))
+countBamInGRanges <- function(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE) {
+  rds.counts <- integer(length(granges))
+  seq.names <- as.character(seqlevels(granges))
   seq.names.in.bam <- names(scanBamHeader(bam.file)[[1]]$targets)
   for (seq.name in seq.names) {
     if (seq.name %in% seq.names.in.bam) {
       granges.subset <- granges[seqnames(granges)==seq.name]
       strand(granges.subset) <- "*"
-      rds <- scanBam(bam.file,param=ScanBamParam(what=c("pos","mapq"),which=range(granges.subset)))
+      if (get.width) {
+        rds <- scanBam(bam.file, param = ScanBamParam(what = c("pos", "mapq", "qwidth"), which = range(granges.subset)))
+      } else {
+        rds <- scanBam(bam.file, param = ScanBamParam(what = c("pos", "mapq"), which = range(granges.subset)))
+      }
       mapq.test <- rds[[1]]$mapq >= min.mapq & !is.na(rds[[1]]$mapq)
       if (sum(mapq.test) > 0) {
-        rds.ranges <- GRanges(seq.name,IRanges(start=rds[[1]]$pos[mapq.test],width=read.width))
+        if (get.width) {
+          rds.ranges <- GRanges(seq.name, IRanges(start = rds[[1]]$pos[mapq.test], width = rds[[1]]$qwidth[mapq.test]))
+        } else {
+          rds.ranges <- GRanges(seq.name, IRanges(start = rds[[1]]$pos[mapq.test], width = read.width))
+        }
         rds.counts.seq.name <- countOverlaps(granges.subset,rds.ranges)
         rds.counts[as.logical(seqnames(granges)==seq.name)] <- rds.counts.seq.name
       } else {

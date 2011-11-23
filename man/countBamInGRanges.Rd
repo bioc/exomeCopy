@@ -11,9 +11,13 @@
   experiments, from each sample.  These read counts are used by
   \code{\link{exomeCopy}} in predicting CNVs in samples.  
 
-  With the default setting (\code{read.width}=1), only the read starts are used
-  for counting purposes (the leftmost position regardless of the
-  strandedness of the read).
+  With the default setting (\code{read.width}=1), only the read starts
+  are used for counting purposes (the leftmost position regardless of
+  the strandedness of the read). 
+
+  With the accurate read width, or with \code{get.width} = TRUE, then
+  the function returns the number of overlapping reads, as returned by 
+  \code{\link{countOverlaps}} in the GenomicRanges package. 
 
   The function \code{\link{subdivideGRanges}} can be used first to
   subdivide ranges of different size into ranges of nearly equal width.
@@ -22,7 +26,7 @@
   \code{\link{indexBam}} in the Rsamtools package). 
 }
 \usage{
-  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1)
+  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE)
 }
 \arguments{
   \item{bam.file}{
@@ -44,9 +48,14 @@
     However, counting all overlapping reads introduces dependency
     between the counts in adjacent windows. 
   }
+  \item{get.width}{
+    Whether the function should retrieve the read width from the CIGAR
+    encoding rather than assign the value from read.width.  If TRUE, then
+    read.width is ignored.
+    }
 }
 \value{
-  A vector giving the number of reads over the input GRanges
+  An integer vector giving the number of reads over the input GRanges
   }
 \seealso{
   \code{\link{Rsamtools}}

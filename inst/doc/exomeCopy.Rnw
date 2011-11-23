@@ -23,7 +23,7 @@
 \maketitle
 
 \begin{abstract}
-  \exomeCopy is an R package implementing a hidden Markov model\footnote{The manuscript describing the model \citep{Love2011Modeling} is listed in the references of this vignette.} for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data are \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy number and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
+  \exomeCopy is an R package implementing a hidden Markov model for predicting copy number variants (CNVs) from exome/targeted sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{The model implemented in this package is described in \citep{Love2011Modeling}.  R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data include \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy number and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
 \end{abstract}
 
 \tableofcontents
@@ -91,7 +91,7 @@ target.sub
 <<>>=
 bam.file <- system.file("extdata","mapping.bam",package="exomeCopy")
 scanBamHeader(bam.file)[[1]]$targets
-levels(seqnames(target.sub))
+seqlevels(target.sub)
 rdata <- RangedData(space=seqnames(target.sub),ranges=ranges(target.sub))
 rdata[["sample1"]] <- countBamInGRanges(bam.file,target.sub)
 rdata
