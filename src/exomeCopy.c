@@ -53,7 +53,8 @@ void viterbi( int *ptmax, int *pnstates, double *start_probs, double *a, double 
   int i, j, t;
   int tmax = ptmax[0];
   int nstates = pnstates[0];
-  double vsum, running_max;
+  double vsum = 0.0;
+  double running_max = 0.0;
 
   R_CheckUserInterrupt();
 

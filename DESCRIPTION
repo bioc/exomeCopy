@@ -1,7 +1,7 @@
 Package: exomeCopy
 Type: Package
 Title: Detection of CNV in exome/targeted sequencing data
-Version: 1.0.1
+Version: 1.0.2
 Date: 2011-09-16
 Author: Michael Love
 Maintainer: Michael Love <love@molgen.mpg.de>
