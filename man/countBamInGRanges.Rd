@@ -26,7 +26,7 @@
   \code{\link{indexBam}} in the Rsamtools package). 
 }
 \usage{
-  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE)
+  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE,remove.dup=FALSE)
 }
 \arguments{
   \item{bam.file}{
@@ -52,7 +52,11 @@
     Whether the function should retrieve the read width from the CIGAR
     encoding rather than assign the value from read.width.  If TRUE, then
     read.width is ignored.
-    }
+  }
+  \item{remove.dup}{
+    If true, the function will count only one read for each unique
+    combination of position, strand and read width. 
+  }
 }
 \value{
   An integer vector giving the number of reads over the input GRanges

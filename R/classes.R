@@ -1,6 +1,7 @@
 setClass("ExomeCopy",
          representation =
-         representation(type="character",
+         representation(sample.name="character",
+                        type="character",
                         path="numeric",
                         O="numeric",
                         ranges="IRangesList",

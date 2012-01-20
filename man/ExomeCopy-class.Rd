@@ -14,6 +14,8 @@
 }
 \section{Slots}{
   \describe{
+    \item{\code{sample.name}:}{Object of class \code{"character"}: an
+      identifier for the sample }
     \item{\code{type}:}{Object of class \code{"character"}: the type of
       model used, either
       "exomeCopy" or "exomeCopyVar" }
