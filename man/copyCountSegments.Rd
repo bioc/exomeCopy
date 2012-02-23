@@ -22,7 +22,6 @@
 \seealso{
   \code{\link{exomeCopy}}
   \code{\link{ExomeCopy-class}}
-  \code{\link{RangedData}}
 }
 \examples{
 

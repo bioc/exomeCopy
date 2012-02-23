@@ -44,5 +44,5 @@
 }
 \keyword{datasets}
 \seealso{
-  \code{\link{RangedData}}
+  \code{link{RangedData}}
 }

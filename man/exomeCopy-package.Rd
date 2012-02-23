@@ -13,12 +13,12 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 1.1.4\cr
-    Date: \tab 2011-11-23\cr
+    Version: \tab 1.1.5\cr
+    Date: \tab 2012-02-23\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
-    Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools
-    (>= 1.4.3) \cr
+    Imports: \tab BiocGenerics \cr
+    Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools \cr
     Suggests: \tab Biostrings\cr
   }
 
@@ -34,7 +34,7 @@
   Vingron, Martin; and Haas, Stefan A. (2011) "Modeling Read Counts for
   CNV Detection in Exome Sequencing Data," Statistical Applications in
   Genetics and Molecular Biology: Vol. 10 : Iss. 1, Article 52. DOI: 10.2202/1544-6115.1732
-  \url{http://www.bepress.com/sagmb/vol10/iss1/art52}.
+  \url{http://www.degruyter.com/view/j/sagmb.2011.10.issue-1/1544-6115.1732/1544-6115.1732.xml}.
 }
 \keyword{ package }
 \seealso{

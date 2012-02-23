@@ -1,6 +1,6 @@
 useDynLib(exomeCopy, .registration = TRUE)
-importFrom("methods",show)
-importFrom("graphics",plot)
+importFrom(methods,show)
+importFrom(BiocGenerics, plot)
 import(IRanges,GenomicRanges,Rsamtools)
 
 export(copyCountSegments,
@@ -13,3 +13,4 @@ export(copyCountSegments,
 
 exportClasses(ExomeCopy)
 exportMethods(show,plot)
+
