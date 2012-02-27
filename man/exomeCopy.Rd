@@ -142,13 +142,8 @@ init.phi="norm")
   genomic range
   }
     \item{\code{ranges}:}{the IRangesList for ranges }
-    \item{\code{O}:}{the input vector of counts }
     \item{\code{O.norm}:}{the input vector of counts divided by the
   estimated mean vector, mu }
-    \item{\code{mu}:}{the estimated mean vector, matrix multiplication
-  of X and beta }
-    \item{\code{phi}:}{a scalar esimate of phi ( or matrix
-  multiplication of Y times gamma for exomeCopyVar) }
     \item{\code{fx.par}:}{a list of the settings S, d, cnv.states,
       and the logical variable fit.var}
     \item{\code{init.par}:}{a list of the initial parameters goto.cnv,
@@ -205,8 +200,11 @@ init.phi="norm")
 
 ## create RangedData for storing genomic ranges and covariate data
 ## (background, background stdev, GC-content)
+
 m <- 5000
-rdata <- RangedData(IRanges(start=0:(m-1)*100+1,width=100),space=rep("chr1",m),universe="hg19",bg=rexp(m,1),bg.sd=rexp(m,1),gc=rnorm(m,50,10))
+rdata <- RangedData(IRanges(start=0:(m-1)*100+1,width=100),
+space=rep("chr1",m), universe="hg19", bg=rexp(m,1), bg.sd=rexp(m,1),
+gc=rnorm(m,50,10))  
 
 ## create read depth distributional parameters mu and phi
 rdata$gc.sq <- rdata$gc^2

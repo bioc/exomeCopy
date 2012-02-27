@@ -16,8 +16,9 @@
   }
 }
 \value{
-  Returns a RangedData object with the predicted copy count and
-  the number of genomic ranges spanned by the segment.
+  Returns a RangedData object with the predicted copy count,
+  the number of genomic ranges spanned by the segment, the number of
+  targeted basepairs in the segment, and the sample name.
 }
 \seealso{
   \code{\link{exomeCopy}}

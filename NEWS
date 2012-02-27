@@ -1,0 +1,6 @@
+version 1.2.0: (2012-02-26)
+
+- added functions to compile predicted CNVs across samples and chromosomes and to plot all CNVs found per chromosome (see vignette for a reworked example of looping over multiple samples and chromosomes, compiling and plotting results)
+
+- added functions for generating background read depth and calculating GC content
+

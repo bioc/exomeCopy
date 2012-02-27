@@ -80,6 +80,7 @@ sdev <- 1
 O <- rnorm(T,means[Q],sdev)
 
 ## use viterbiPath() to recover the state chain using parameters
-viterbi.path <- viterbiPath(par=list(means=means),fx.par=list(sdev=sdev),data=list(O=O),nstates=2,stFn,trFn,emFn)
+viterbi.path <- viterbiPath(par=list(means=means),
+fx.par=list(sdev=sdev), data=list(O=O), nstates=2,stFn,trFn,emFn) 
 plot(O,pch=Q,col=c("darkgreen","orange")[viterbi.path])
 }

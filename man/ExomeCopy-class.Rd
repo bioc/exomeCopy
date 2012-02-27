@@ -19,16 +19,12 @@
     \item{\code{type}:}{Object of class \code{"character"}: the type of
       model used, either
       "exomeCopy" or "exomeCopyVar" }
-    \item{\code{path}:}{Object of class \code{"numeric"}: the index of
+    \item{\code{path}:}{Object of class \code{"Rle"}: the index of
       the predicted state for each window }
     \item{\code{ranges}:}{Object of class \code{"IRangesList"}:
-      the corresponding ranges for the observed counts and covariates }
-    \item{\code{O}:}{Object of class \code{"numeric"}: the input vector
-      of counts }    
+      the corresponding ranges for the observed counts and covariates }   
     \item{\code{O.norm}:}{Object of class \code{"numeric"}: the input
       vector of counts divided by X * beta }
-    \item{\code{mu}:}{Object of class \code{"numeric"}: X * beta }
-    \item{\code{phi}:}{Object of class \code{"numeric"}: Y * gamma }
     \item{\code{fx.par}:}{Object of class \code{"list"}: a list of the
       settings S, d, normal.state and fit.var}   
   \item{\code{init.par}:}{Object of class \code{"list"}: a list of the initial parameters goto.cnv, goto.normal, beta.hat and phi.hat }

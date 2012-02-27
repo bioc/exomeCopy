@@ -6,18 +6,42 @@ logit <- function(x) {
   log(x) - log(1-x)
 }
 
+getGCcontent <- function(target, reference.file) {
+  x <- scanFa(reference.file, target)
+  GC.count <- letterFrequency(x,"GC")
+  all.count <- letterFrequency(x,"ATGC")
+  as.vector(ifelse(all.count==0,NA,GC.count/all.count))
+}
+
+generateBackground <- function(sample.names, rdata, fn=median) {
+  C <- as.data.frame(unlist(values(rdata)[,colnames(rdata) %in% sample.names]))
+  C.norm <- sweep(C,2,colMeans(C),"/")
+  apply(C.norm,1,fn)
+}
+
 copyCountSegments <- function(object) {
   x <- object@path
   changes <- which(x[-length(x)] != x[-1]) + 1
   range.start <- c(1,changes)
   range.end <- c(changes-1,length(x))
+  targeted.bp <- sapply(1:length(range.start),function(i) sum(width(object@ranges)[[1]][range.start[i]:range.end[i]]))
   RangedData(
              IRanges(start=start(object@ranges)[[1]][range.start],
              end=end(object@ranges)[[1]][range.end]),
              space=space(object@ranges)[1],
              universe=universe(object@ranges),
-             copy.count=object@fx.par$S[x[range.start]],
-             nranges=(range.end - range.start + 1))
+             copy.count=object@fx.par$S[as.numeric(x[range.start])],
+             nranges=(range.end - range.start + 1),
+             targeted.bp=targeted.bp,
+             sample.name=object@sample.name)
+}
+
+compileCopyCountSegments <- function(fit.list) {
+  sample.res <- lapply(fit.list,function(seq.list) {
+    seq.res <- lapply(seq.list, copyCountSegments)
+    do.call(rbind,seq.res)
+  })
+  do.call(rbind,sample.res)
 }
 
 plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=1,lwd=4,...) {
@@ -33,7 +57,7 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
   if (is.null(xlim)) xlim <- c(start(range(x@ranges))[[1]],end(range(x@ranges))[[1]])
   plot(0,0,type="n",xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim,main=main,...)
   if (points) {
-    points(mid(x@ranges[[1]]),x@O.norm*x@fx.par$d,col=cols[x@path],cex=cex)
+    points(mid(x@ranges[[1]]),x@O.norm*x@fx.par$d,col=cols[as.numeric(x@path)],cex=cex)
   }
   ccs <- copyCountSegments(x)
   segments(start(ranges(ccs))[[1]],ccs$copy.count,
@@ -44,6 +68,25 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
   }
 }
 
+plotCompiledCNV <- function(CNV.segments, seq.name, xlim=NULL, col=NULL, copy.counts=0:6, normal.state = 2) {
+  CNV.subset <- CNV.segments[CNV.segments$space == seq.name,]
+  seq.range <- range(CNV.subset)[[seq.name]]
+  if (is.null(xlim)) {
+    xlim <- c(start(seq.range),end(seq.range))
+  }
+  if (is.null(col)) {
+    col <- ifelse(copy.counts < normal.state,"red",ifelse(copy.counts > normal.state,"blue","black"))
+  }
+  samples <- unique(CNV.subset$sample.name)
+  plot(0,0,type="n",xlim=xlim,ylim=c(0,length(samples)+1),xlab="genomic position",ylab="",main=seq.name,yaxt="n")
+  axis(2,at=1:length(samples),labels=samples,las=2,cex.axis=.6)
+  for (i in 1:length(samples)) {
+    sample.name <- samples[i]
+    CNV.sample <- CNV.subset[CNV.subset$sample.name == sample.name,]
+    copy.count.idx <- match(CNV.sample$copy.count,copy.counts)  
+    segments(start(CNV.sample),rep(i,length(CNV.sample)),end(CNV.sample),rep(i,length(CNV.sample)),lwd=3,col=col[copy.count.idx])
+  }
+}
 
 countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, get.width = FALSE, remove.dup = FALSE) {
   rds.counts <- integer(length(granges))
@@ -130,8 +173,7 @@ subdivideIRanges <- function(x,subsize=100) {
   IRanges(start=out.start.pos,end=out.end.pos)
 }
 
-subdivideGRanges <- function (x, subsize=100) 
-{
+subdivideGRanges <- function (x, subsize=100) {
   if (length(x) == 0) {
     return(x)
   }
@@ -144,3 +186,4 @@ subdivideGRanges <- function (x, subsize=100)
   })
   do.call(c, gr_list)
 }
+

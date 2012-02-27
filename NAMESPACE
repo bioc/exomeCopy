@@ -3,13 +3,17 @@ importFrom(methods,show)
 importFrom(BiocGenerics, plot)
 import(IRanges,GenomicRanges,Rsamtools)
 
-export(copyCountSegments,
+export(subdivideGRanges,
        countBamInGRanges,
+       getGCcontent,
+       generateBackground,
        exomeCopy,
+       copyCountSegments,
        plot.ExomeCopy,
+       compileCopyCountSegments,
+       plotCompiledCNV,
        negLogLike,
-       viterbiPath,
-       subdivideGRanges)
+       viterbiPath)
 
 exportClasses(ExomeCopy)
 exportMethods(show,plot)
