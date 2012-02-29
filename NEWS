@@ -1,6 +1,9 @@
 version 1.2.0: (2012-02-26)
 
-- added functions to compile predicted CNVs across samples and chromosomes and to plot all CNVs found per chromosome (see vignette for a reworked example of looping over multiple samples and chromosomes, compiling and plotting results)
+- support for multisample projects: distribute sample segmentation across workstations, compile results and plot CNVs across samples (see vignette for a reworked example)
 
-- added functions for generating background read depth and calculating GC content
+- strand-aware read starts and duplicate read removal for counting reads from a BAM file in genomic ranges
+
+- functions for generating background read depth and calculating GC content
+
 

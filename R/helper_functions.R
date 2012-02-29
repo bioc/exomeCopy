@@ -88,7 +88,7 @@ plotCompiledCNV <- function(CNV.segments, seq.name, xlim=NULL, col=NULL, copy.co
   }
 }
 
-countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, get.width = FALSE, remove.dup = FALSE) {
+countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, stranded.start = FALSE, get.width = FALSE, remove.dup = FALSE) {
   rds.counts <- integer(length(granges))
   seq.names <- unique(as.character(seqnames(granges)))
   seq.names.in.bam <- names(scanBamHeader(bam.file)[[1]]$targets)
@@ -97,10 +97,10 @@ countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, 
       granges.subset <- granges[seqnames(granges) == seq.name]
       strand(granges.subset) <- "*"
       scan.what <- c("pos","mapq")
-      if (get.width) {
+      if (stranded.start | get.width) {
         scan.what <- c(scan.what, "qwidth")
       }
-      if (remove.dup) {
+      if (stranded.start | remove.dup) {
         scan.what <- c(scan.what, "strand")
       }
       rds <- scanBam(bam.file, param = ScanBamParam(what = scan.what, which = range(granges.subset)))
@@ -116,7 +116,10 @@ countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, 
         }
       }
       if (sum(mapq.test) > 0) {
-        if (get.width) {
+        if (stranded.start) {
+          rds.ranges <- GRanges(seq.name, IRanges(start = ifelse(rds[[1]]$strand[mapq.test] %in% c("+","*"), rds[[1]]$pos[mapq.test] , rds[[1]]$pos[mapq.test] + rds[[1]]$qwidth[mapq.test] - read.width), end = ifelse(rds[[1]]$strand[mapq.test] %in% c("+","*"), rds[[1]]$pos[mapq.test] + read.width - 1, rds[[1]]$pos[mapq.test] + rds[[1]]$qwidth[mapq.test] - 1)))
+        }
+        else if (get.width) {
           rds.ranges <- GRanges(seq.name, IRanges(start = rds[[1]]$pos[mapq.test], width = rds[[1]]$qwidth[mapq.test]))
         }
         else {

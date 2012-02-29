@@ -26,7 +26,7 @@
   \code{\link{indexBam}} in the Rsamtools package). 
 }
 \usage{
-  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1,get.width=FALSE,remove.dup=FALSE)
+  countBamInGRanges(bam.file,granges,min.mapq=1,read.width=1,stranded.start=FALSE,get.width=FALSE,remove.dup=FALSE)
 }
 \arguments{
   \item{bam.file}{
@@ -48,10 +48,15 @@
     However, counting all overlapping reads introduces dependency
     between the counts in adjacent windows. 
   }
+  \item{stranded.start}{
+    If true, the function will create reads of length \code{read.width}
+  using the strand to determine the read location.  A read with + or *
+  strand will start at the given start position, and a read with -
+  strand will end at (start position + CIGAR width - 1).
+    }
   \item{get.width}{
-    Whether the function should retrieve the read width from the CIGAR
-    encoding rather than assign the value from read.width.  If TRUE, then
-    read.width is ignored.
+    If true, the function should retrieve the read width from the CIGAR
+    encoding rather than assign the value from read.width.
   }
   \item{remove.dup}{
     If true, the function will count only one read for each unique
