@@ -104,7 +104,11 @@ countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, 
         scan.what <- c(scan.what, "strand")
       }
       rds <- scanBam(bam.file, param = ScanBamParam(what = scan.what, which = range(granges.subset)))
-      mapq.test <- rds[[1]]$mapq >= min.mapq & !is.na(rds[[1]]$mapq)
+      if (min.mapq > 0) {
+        mapq.test <- rds[[1]]$mapq >= min.mapq & !is.na(rds[[1]]$mapq)
+      } else {
+        mapq.test <- rep(TRUE,length(rds[[1]]$mapq))
+      }
       if (remove.dup) {
         if (get.width) {
           # this check is fast and accurate, assuming that read widths
@@ -135,6 +139,9 @@ countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, 
     else {
       rds.counts[as.logical(seqnames(granges) == seq.name)] <- 0
     }
+  }
+  if (sum(rds.counts) == 0) {
+    warning("No reds found with minimum mapping quality")
   }
   rds.counts
 }

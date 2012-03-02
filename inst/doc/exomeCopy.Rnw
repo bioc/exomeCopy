@@ -260,15 +260,15 @@ seqs <- c("chr1","chr1a")
 names(seqs) <- seqs
 samples <- exome.samples[1:8]
 names(samples) <- samples
-t0 <- Sys.time()
+t0 <- as.numeric(proc.time()[3])
 fit.list <- lapply(samples,runExomeCopy,seqs)
-t1 <- Sys.time()
+t1 <- as.numeric(proc.time()[3])
 paste("~",round((as.numeric(t1 - t0) / 60) / (8 * sum(width(rdata))) * 32e6,1)," minutes for 1 sample, 32 Mb of target",sep="")
 @ 
 
-\subsection{Compiling results, filter and plot CNVs}
+\subsection{Compiling results, filtering and plotting CNVs}
 
-Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples.  We remove the segments with copy count 2.  As exome sequencing is subject to high variance in read counts, in some samples a few ranges with too high or low read counts are called as CNV, which we see in the next plot.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).
+Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples.  We remove the segments with copy count 2.  As exome sequencing is subject to high variance in read counts, in some samples ranges with too high or low read counts might be predicted to be CNV.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).
 
 <<>>=
 compiled.segments <- compileCopyCountSegments(fit.list)
