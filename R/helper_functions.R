@@ -45,7 +45,7 @@ compileCopyCountSegments <- function(fit.list) {
 }
 
 plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=1,lwd=4,...) {
-  if (length(cols) != length(x@fx.par$S)) {
+  if ((length(cols) != length(x@fx.par$S)) & (!is.null(cols))) {
     warning("Supplied colors are not the same length as S (copy number states)")
   }
   if (is.null(cols) | (length(cols) != length(x@fx.par$S))) {

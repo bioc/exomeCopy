@@ -1,11 +1,11 @@
 Package: exomeCopy
 Type: Package
-Title: Detection of CNV in exome/targeted sequencing data
+Title: CNV detection from exome sequencing read depth
 Version: 1.1.7
 Date: 2012-02-26
 Author: Michael Love
 Maintainer: Michael Love <love@molgen.mpg.de>
-Description: A hidden Markov model for the detection of copy number variants (CNV) in exome/targeted sequencing read depth data.  The package uses positional covariates, such as background read depth and GC-content, to simultaneously normalize and segment the samples into regions of constant copy count.
+Description:  Detection of copy number variants (CNV) from exome sequencing samples, including unpaired samples.  The package implements a hidden Markov model which uses positional covariates, such as background read depth and GC-content, to simultaneously normalize and segment the samples into regions of constant copy count.
 License: GPL (>= 2)
 LazyLoad: yes
 Imports: BiocGenerics
