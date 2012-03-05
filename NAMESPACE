@@ -1,6 +1,6 @@
 useDynLib(exomeCopy, .registration = TRUE)
 importFrom(methods,show)
-importFrom(BiocGenerics, plot)
+importFrom(stats4, plot)
 import(IRanges,GenomicRanges,Rsamtools)
 
 export(subdivideGRanges,

@@ -249,7 +249,7 @@ In order to apply \exomeCopy to a full dataset of multiple chromosomes and sampl
 
 <<>>=
 runExomeCopy <- function(sample.name,seqs) {
-  lapply(seqs,function(seq.name) exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"),S=0:6,d=2))
+  lapply(seqs,function(seq.name) exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"),S=0:4,d=2))
 }
 @ 
 
@@ -279,6 +279,7 @@ Finally, we can plot the CNVs for each sequence across samples using \texttt{plo
 
 \begin{center}
 <<fig=TRUE>>=
+cnv.cols <- c("red","orange","black","deepskyblue","blue")
 plotCompiledCNV(CNV.segments=CNV.segments, seq.name="chr1", col=cnv.cols)
 @ 
 
