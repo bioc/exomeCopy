@@ -143,7 +143,10 @@ init.phi="norm")
   }
     \item{\code{ranges}:}{the IRangesList for ranges }
     \item{\code{O.norm}:}{the input vector of counts divided by the
-  estimated mean vector, mu }
+      estimated mean vector, mu }
+    \item{\code{log.odds}:}{ the log ratio of the emission probabilities
+  along the predicted path over the emission probabilities of the normal
+  state}
     \item{\code{fx.par}:}{a list of the settings S, d, cnv.states,
       and the logical variable fit.var}
     \item{\code{init.par}:}{a list of the initial parameters goto.cnv,

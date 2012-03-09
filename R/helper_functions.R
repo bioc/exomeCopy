@@ -25,12 +25,14 @@ copyCountSegments <- function(object) {
   range.start <- c(1,changes)
   range.end <- c(changes-1,length(x))
   targeted.bp <- sapply(1:length(range.start),function(i) sum(width(object@ranges)[[1]][range.start[i]:range.end[i]]))
+  log.odds <- sapply(1:length(range.start),function(i) sum(object@log.odds[range.start[i]:range.end[i]]))
   RangedData(
              IRanges(start=start(object@ranges)[[1]][range.start],
              end=end(object@ranges)[[1]][range.end]),
              space=space(object@ranges)[1],
              universe=universe(object@ranges),
              copy.count=object@fx.par$S[as.numeric(x[range.start])],
+             log.odds=round(log.odds,2),
              nranges=(range.end - range.start + 1),
              targeted.bp=targeted.bp,
              sample.name=object@sample.name)

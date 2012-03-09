@@ -25,6 +25,9 @@
       the corresponding ranges for the observed counts and covariates }   
     \item{\code{O.norm}:}{Object of class \code{"numeric"}: the input
       vector of counts divided by X * beta }
+    \item{\code{log.odds}:}{Object of class \code{"numeric"}: the log
+      ratio of the emission probabilities along the predicted path over
+      the emission probabilities of the normal state }
     \item{\code{fx.par}:}{Object of class \code{"list"}: a list of the
       settings S, d, normal.state and fit.var}   
   \item{\code{init.par}:}{Object of class \code{"list"}: a list of the initial parameters goto.cnv, goto.normal, beta.hat and phi.hat }

@@ -168,6 +168,8 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
     type="exomeCopyVar"
   }
   path <- viterbiPath(nm.fit$par,fx.par,data,nstates,stFn,trFn,emFn)
-  fit <- new("ExomeCopy",sample.name=sample.name,type=type,path=Rle(path),ranges=ranges(rdata),O.norm=as.numeric(O/mu.hat),fx.par=fx.par,init.par=init.par,final.par=list(goto.cnv=goto.cnv.hat,goto.normal=goto.normal.hat,beta=beta.hat,gamma=gamma.hat),counts=nm.fit$counts,convergence=nm.fit$convergence,nll=nm.fit$value) 
+  emit.probs <- emFn(nm.fit$par,fx.par,data,nstates)
+  log.odds <- log(emit.probs[cbind(path,seq(path))]+1e-6) - log(emit.probs[normal.state,]+1e-6)
+  fit <- new("ExomeCopy",sample.name=sample.name,type=type,path=Rle(path),ranges=ranges(rdata),O.norm=as.numeric(O/mu.hat),log.odds=log.odds,fx.par=fx.par,init.par=init.par,final.par=list(goto.cnv=goto.cnv.hat,goto.normal=goto.normal.hat,beta=beta.hat,gamma=gamma.hat),counts=nm.fit$counts,convergence=nm.fit$convergence,nll=nm.fit$value) 
   return(fit)
 }

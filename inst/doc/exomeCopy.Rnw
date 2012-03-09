@@ -229,7 +229,7 @@ We can now run \exomeCopy using the read counts for one of the simulated CNV sam
   show(fit)
 @
 
-After fitting, we call the function \texttt{copyCountSegments} on the \textit{ExomeCopy} object, which provides the segmentation with the predicted copy number , the number of input genomic ranges contained within each segment, the number of targeted basepairs contained in the segments, and the name of the sample to help compile the segments across samples.
+After fitting, we call the function \texttt{copyCountSegments} on the \textit{ExomeCopy} object, which provides the segmentation with the predicted copy number, the log odds of read counts being emitted from predicted copy count over normal copy count, the number of input genomic ranges contained within each segment, the number of targeted basepairs contained in the segments, and the name of the sample to help compile the segments across samples.  The columns \texttt{log.odds} and \texttt{nranges} can be useful for filtering, see \texttt{?copyCountSegments} for details.
 
 <<>>=
   copyCountSegments(fit)
@@ -269,12 +269,21 @@ paste("~",round((as.numeric(t1 - t0) / 60) / (8 * sum(width(rdata))) * 32e6,1),"
 
 \subsection{Compiling results, filtering and plotting CNVs}
 
-Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples.  We remove the segments with copy count 2, leaving the predicted CNVs for autosomal ranges.  As exome sequencing is subject to high variance in read counts, in some samples ranges with too high or low read counts might be predicted to be CNV.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).
+Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples.  We remove the segments with copy count 2, leaving the predicted CNVs for autosomal ranges.  
 
 <<>>=
 compiled.segments <- compileCopyCountSegments(fit.list)
-CNV.segments <- compiled.segments[compiled.segments$copy.count != 2 & compiled.segments$nranges > 5,]
+CNV.segments <- compiled.segments[compiled.segments$copy.count != 2,]
 @ 
+
+As exome sequencing is subject to high variance in read counts, in some samples ranges with too high or low read counts might be predicted to be CNV.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).  The filtered CNV segments can be exported to tab-delimited files using \texttt{as.data.frame} and \texttt{write.table}.
+
+\begin{small}
+<<>>=
+CNV.segments[1:6,]
+CNV.segments <- CNV.segments[CNV.segments$nranges > 5,]
+@ 
+\end{small}
 
 Finally, we can plot the CNVs for each sequence across samples using \texttt{plotCompiledCNV} and specifying which sequence to plot.
 
