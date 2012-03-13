@@ -2,6 +2,8 @@ version 1.2.0: (2012-02-26)
 
 - support for multisample projects: distribute sample segmentation across workstations, compile results and plot CNVs across samples (see vignette for a reworked example)
 
+- log odds ratios for CNV segments using the fitted distribution of counts for the predicted and normal state
+
 - strand-aware read starts and duplicate read removal for counting reads from a BAM file in genomic ranges
 
 - functions for generating background read depth and calculating GC content

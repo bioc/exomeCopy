@@ -4,10 +4,10 @@
   Compile segments across samples
 }
 \description{
-  A short function which extracts the segments of constant copy count using the
-  \code{\link{copyCountSegments}} function on a named list of named lists containing
-  fitted ExomeCopy objects.  See vignette for a full example of multiple
-  samples and chromosomes.
+  A short function which extracts the segments of constant copy count
+  using the \code{\link{copyCountSegments}} function on a named list of
+  named lists containing fitted ExomeCopy objects.  See vignette for a
+  full example of multiple samples and chromosomes.
 }
 \usage{
   compileCopyCountSegments(fit.list)
@@ -23,6 +23,9 @@
   }
 \examples{
   example(exomeCopy)
+
+  # this function requires a named list of named lists
+  # as constructed in the vignette
   fit.list <- list(sample1 = list(chr1 = fit))
   CNV.segments <- compileCopyCountSegments(fit.list)
 }

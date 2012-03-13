@@ -42,7 +42,9 @@ The \exomeCopy package was designed to address the following situation:
   \item Individual samples can be more or less correlated with background read depth and have different dependencies on GC-content.
 \end{itemize}
 
-While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to import experiment data, generate background read depth, and recover CNVs using \exomeCopy.  The \texttt{exomeCopy} function is applied per chromosome and per sample, so we will use a wrapper function to loop over multiple chromosomes and samples which can easily be distributed across a cluster.
+While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to import experiment data, generate background read depth, and recover CNVs using \exomeCopy. 
+
+\texttt{exomeCopy} is designed to run on read counts from consecutive genomic ranges on a single chromosome, as it tries to identify higher or lower read depth relative to a baseline.  We will use a wrapper function to loop the main function over multiple chromosomes and samples.  Then these results can be compiled across chromosomes and samples.
 
 \section{Importing experiment data}
 
@@ -246,7 +248,7 @@ Calling \texttt{plot} on the \textit{ExomeCopy} object draws segments of constan
 
 \subsection{Looping \exomeCopy over multiple samples and chromosomes}
 
-In order to apply \exomeCopy to a full dataset of multiple chromosomes and samples, we write a wrapper function \texttt{runExomeCopy}.  This construction allows for distribution of fitting each samples across workstations.  Keep in mind that the non-PAR region of chrX in male samples should be fit separately, with \texttt{d = 1}.
+In order to apply \exomeCopy to a full dataset of multiple chromosomes and samples, we write a wrapper function \texttt{runExomeCopy}.  We will only model duplications up to 4 copies.  The wrapper construction allows for distribution of fitting each samples across workstations.  Keep in mind that the non-PAR region of chrX, in male samples should be fit separately, with \texttt{d = 1}.
 
 <<>>=
 runExomeCopy <- function(sample.name,seqs) {
@@ -264,7 +266,9 @@ names(samples) <- samples
 t0 <- as.numeric(proc.time()[3])
 fit.list <- lapply(samples,runExomeCopy,seqs)
 t1 <- as.numeric(proc.time()[3])
-paste("~",round((as.numeric(t1 - t0) / 60) / (8 * sum(width(rdata))) * 32e6,1)," minutes for 1 sample, 32 Mb of target",sep="")
+time.elapsed <- as.numeric(t1 - t0)
+paste(round(time.elapsed),"seconds for",length(samples),"samples,",round(sum(width(rdata))/1e3),"kb of target")
+paste("~",round(time.elapsed / 60 / (8 * sum(width(rdata))) * 32e6,1)," minutes for 1 sample, 32 Mb of target",sep="")
 @ 
 
 \subsection{Compiling results, filtering and plotting CNVs}
@@ -276,7 +280,9 @@ compiled.segments <- compileCopyCountSegments(fit.list)
 CNV.segments <- compiled.segments[compiled.segments$copy.count != 2,]
 @ 
 
-As exome sequencing is subject to high variance in read counts, in some samples ranges with too high or low read counts might be predicted to be CNV.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).  The filtered CNV segments can be exported to tab-delimited files using \texttt{as.data.frame} and \texttt{write.table}.
+Some non-CNV ranges with too high or low read counts might be predicted to be CNV, despite the use of positional covariates and overdispersion in the emission distributions of the HMM.  Often the majority of these cases can be removed by requiring a minimum number of ranges (for example requiring the \texttt{nranges} column returned by \texttt{copyCountSegments} to be greater than 5).  The filtered CNV segments can be exported to tab-delimited files using \texttt{as.data.frame} and then \texttt{write.table}.
+
+\texttt{copyCountSegments} also provides a column of log odds for each segment.  This is the log ratio of the probability density function for the fitted predicted distribution over the fitted normal state distribution, then summed over all ranges in a segment (details of these are given in the help for \texttt{copyCountSegments}.)  By definition these will be zero for the segments predicted normal and positive for the CNV segments.
 
 \begin{small}
 <<>>=
@@ -285,7 +291,7 @@ CNV.segments <- CNV.segments[CNV.segments$nranges > 5,]
 @ 
 \end{small}
 
-Finally, we can plot the CNVs for each sequence across samples using \texttt{plotCompiledCNV} and specifying which sequence to plot.
+\texttt{plotCompiledCNV} will plot the CNVs for a given sequence across samples if given an object returned by compileCopyCountSegments and the sequence name.
 
 \begin{center}
 <<fig=TRUE>>=

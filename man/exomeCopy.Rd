@@ -4,31 +4,35 @@
   Fit the exomeCopy or exomeCopyVar model to the observed counts.
 }
 \description{
-  Fits a hidden Markov model to observed read counts using positional covariates.
-  It returns an object containing the fitted parameters and the Viterbi
-  path, the most likely path of hidden states, which is the predicted
-  copy count at each window.  \code{exomeCopy} is designed to run on read
-  counts from a single chromosome.  Please see the vignette for an example of
-  how to prepare input data for \code{exomeCopy} and how to loop the
-  function over multiple chromosomes and samples. 
+  Fits a hidden Markov model to observed read counts using positional
+  covariates. It returns an object containing the fitted parameters and
+  the Viterbi path, the most likely path of hidden states, which is the
+  predicted copy count at each window.  
+
+  \code{exomeCopy} is designed to run on read counts from consecutive
+  genomic ranges on a single chromosome, as it tries to identify higher
+  or lower read depth relative to a baseline.  Please see the vignette
+  for an example of how to prepare input data for \code{exomeCopy}, how
+  to loop the function over multiple chromosomes and samples, and how to
+  extract the resulting predicted CNVs.  
 
   \code{exomeCopy} requires as input a \code{\link{RangedData}} object
   containing read counts in genomic ranges along with the covariates.
-  Two convenience functions are provided for preparing input for
+  Some convenience functions are provided for preparing input for
   \code{exomeCopy}: 
 
   \enumerate{
   \item \code{\link{subdivideGRanges}}, to subdivide a \code{\link{GRanges}}
   object containing the genomic ranges of the targeted region into
-  genomic ranges of nearly equal width, and
+  genomic ranges of nearly equal width,
   \item \code{\link{countBamInGRanges}}, to count the number of read starts
-  from a BAM read mapping file in a \code{\link{GRanges}} object.
+  from a BAM read mapping file in a \code{\link{GRanges}} object,
+  \item \code{\link{getGCcontent}}, to get the GC-content in the ranges
+  given a FASTA file of the reference sequence,
+  \item \code{\link{generateBackground}}, to calculate median normalized
+  read depth over a set of control samples, and also any statistic over
+  normalized read depth.
 }
-
-  The GC-content (ratio of G and C bases to total number of bases) for
-  the input ranges can be obtained using \code{scanFa} in the Rsamtools
-  package to obtain a DNAStringSet object and \code{letterFrequency} in
-  the Biostrings package.  See the vignette for an example.
 }
 \usage{
   exomeCopy(rdata, sample.name, X.names, Y.names, fit.var=FALSE, reltol
@@ -131,32 +135,12 @@ init.phi="norm")
   \code{exomeCopy} calls \code{\link{negLogLike}} to evaluate the likelihood of
   the HMM.  The parameters are fit using Nelder-Mead optimization with
   the \code{\link{optim}} function on the negative likelihood. The
-  viterbi path is calculated by calling \code{\link{viterbiPath}}.  
+  Viterbi path is calculated by calling \code{\link{viterbiPath}}.  
 }
 \value{
-  Returns an ExomeCopy object with the following slots:
-  \describe{
-    \item{\code{type}:}{the type of model used, either "exomeCopy" or
-  "exomeCopyVar" }
-    \item{\code{path}:}{the index of the predicted state for each
-  genomic range
-  }
-    \item{\code{ranges}:}{the IRangesList for ranges }
-    \item{\code{O.norm}:}{the input vector of counts divided by the
-      estimated mean vector, mu }
-    \item{\code{log.odds}:}{ the log ratio of the emission probabilities
-  along the predicted path over the emission probabilities of the normal
-  state}
-    \item{\code{fx.par}:}{a list of the settings S, d, cnv.states,
-      and the logical variable fit.var}
-    \item{\code{init.par}:}{a list of the initial parameters goto.cnv,
-      goto.normal, beta.hat and phi.hat }
-    \item{\code{final.par}:}{a list of the final parameters goto.cnv,
-      goto.normal, beta (and gamma for exomeCopyVar) }
-    \item{\code{counts}:}{the number of evaluations of the log likelihood performed by \code{\link{optim}} }
-    \item{\code{convergence}:}{the integer for convergence of \code{\link{optim}}, 0 for convergence }
-    \item{\code{nll}:}{the final value of the negative log likelihood }
-  }
+  Returns an \code{\link{ExomeCopy-class}} object.  See this page for the
+  slot descriptions.  Also see the vignette and
+  \code{\link{copyCountSegments}} on how to extract segments. 
 }
 \references{
   Love, Michael I.; Mysickova, Alena; Sun, Ruping; Kalscheuer, Vera;
@@ -186,6 +170,7 @@ init.phi="norm")
   Michael Love
 }
 \seealso{
+  \code{\link{ExomeCopy-class}}
   \code{\link{subdivideGRanges}}
   \code{\link{countBamInGRanges}}
   \code{\link{copyCountSegments}}
