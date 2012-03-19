@@ -1,7 +1,7 @@
 Package: exomeCopy
 Type: Package
 Title: CNV detection from exome sequencing read depth
-Version: 1.1.10
+Version: 1.1.11
 Date: 2012-03-12
 Author: Michael Love
 Maintainer: Michael Love <love@molgen.mpg.de>

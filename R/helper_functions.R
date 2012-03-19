@@ -22,8 +22,13 @@ generateBackground <- function(sample.names, rdata, fn=median) {
 copyCountSegments <- function(object) {
   x <- object@path
   changes <- which(x[-length(x)] != x[-1]) + 1
-  range.start <- c(1,changes)
-  range.end <- c(changes-1,length(x))
+  if (length(changes) > 0) {
+    range.start <- c(1,changes)
+    range.end <- c(changes-1,length(x))
+  } else {
+    range.start <- 1
+    range.end <- length(x)
+  }
   targeted.bp <- sapply(1:length(range.start),function(i) sum(width(object@ranges)[[1]][range.start[i]:range.end[i]]))
   log.odds <- sapply(1:length(range.start),function(i) sum(object@log.odds[range.start[i]:range.end[i]]))
   RangedData(
