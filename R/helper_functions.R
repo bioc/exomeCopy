@@ -9,8 +9,13 @@ logit <- function(x) {
 copyCountSegments <- function(object) {
   x <- object@path
   changes <- which(x[-length(x)] != x[-1]) + 1
-  range.start <- c(1,changes)
-  range.end <- c(changes-1,length(x))
+  if (length(changes) > 0) {
+    range.start <- c(1,changes)
+    range.end <- c(changes-1,length(x))
+  } else {
+    range.start <- 1
+    range.end <- length(x)
+  }
   RangedData(
              IRanges(start=start(object@ranges)[[1]][range.start],
              end=end(object@ranges)[[1]][range.end]),

@@ -13,7 +13,7 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 1.0.2\cr
+    Version: \tab 1.0.3\cr
     Date: \tab 2011-10-27\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
@@ -34,7 +34,7 @@
   Vingron, Martin; and Haas, Stefan A. (2011) "Modeling Read Counts for
   CNV Detection in Exome Sequencing Data," Statistical Applications in
   Genetics and Molecular Biology: Vol. 10 : Iss. 1, Article 52. DOI: 10.2202/1544-6115.1732
-  \url{http://www.bepress.com/sagmb/vol10/iss1/art52}.
+  \url{http://cmb.molgen.mpg.de/publications/Love_2011_exomeCopy.pdf}.
 }
 \keyword{ package }
 \seealso{

@@ -165,7 +165,7 @@ init.phi="norm")
   Vingron, Martin; and Haas, Stefan A. (2011) "Modeling Read Counts for
   CNV Detection in Exome Sequencing Data," Statistical Applications in
   Genetics and Molecular Biology: Vol. 10 : Iss. 1, Article 52. DOI: 10.2202/1544-6115.1732
-  \url{http://www.bepress.com/sagmb/vol10/iss1/art52}.
+  \url{http://cmb.molgen.mpg.de/publications/Love_2011_exomeCopy.pdf}.
 
   References for HMM algorithms and use of HMM for segmentation of
   genomic data by copy number:
