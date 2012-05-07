@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{CNV detection in exome sequencing data}
+% \VignetteIndexEntry{Copy number variant detection in exome sequencing data}
 % \VignetteDepends{methods, graphics, IRanges, GenomicRanges, Rsamtools, Biostrings}
 % \VignetteKeyword{CNV}
 
@@ -19,7 +19,7 @@
 options(width = 70)
 @ 
 
-\title{CNV detection in exome sequencing data using \exomeCopy}
+\title{Copy number variant detection in exome sequencing data using \exomeCopy}
 \author{Michael Love\\
 \texttt{love@molgen.mpg.de}}
 \date{\today}
@@ -54,7 +54,7 @@ In this vignette we will use a prepackaged \textit{RangedData} object containing
 
 \subsection{Subdividing targeted regions}
 
-\texttt{subdivideGRanges} divides the targeted genomic ranges into a set of ranges of nearly equal width, which exactly cover the original ranges.  While \exomeCopy can use range width as a covariate for modeling read counts, we find it useful to break apart the largest input ranges into multiple ranges of comparable width to the average input range.  \texttt{subdivideGRanges} requires an input \textit{GRanges} object and returns a \textit{GRanges} object.  
+\texttt{subdivideGRanges} divides the targeted genomic ranges into a set of ranges of nearly equal width, which exactly cover the original ranges.  The ranges will be sorted and reduced if they are not already so.  While \exomeCopy can use range width as a covariate for modeling read counts, we find it useful to break apart the largest input ranges into multiple ranges of comparable width to the average input range.  \texttt{subdivideGRanges} requires an input \textit{GRanges} object and returns a \textit{GRanges} object.  
 
 <<>>=
 library(exomeCopy)
@@ -154,6 +154,13 @@ Note that if the control set is a mix of males and females, the non-pseudoautoso
 exome.samples <- grep("HG.+",colnames(exomecounts.plus),value=TRUE)
 exomecounts.plus[["bg"]] <- generateBackground(exome.samples, exomecounts.plus, median)
 exomecounts.plus[["bg.sd"]] <- generateBackground(exome.samples, exomecounts.plus, sd)
+@ 
+
+We have already removed ranges have zero background coverage, but if we had not we could use the following lines.  If there is zero coverage in the control set, this is most likely a region which is difficult to enrich, and we should not try to infer the copy number here.
+
+<<>>=
+sum(exomecounts.plus[["bg"]] == 0)
+exomecounts.plus <- exomecounts.plus[exomecounts.plus[["bg"]] > 0,]
 @ 
 
 The relationship between read counts and GC-content over the ranges varies across protocols and samples.  It can be roughly approximated per sample using second-order polynomial terms of GC-content.  We store the square of GC-content as a new value column.  Other functions of GC-content could be used as well.  We also store the width of the ranges as a value column.

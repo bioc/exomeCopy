@@ -148,7 +148,7 @@ countBamInGRanges <- function (bam.file, granges, min.mapq = 1, read.width = 1, 
     }
   }
   if (sum(rds.counts) == 0) {
-    warning("No reds found with minimum mapping quality")
+    warning("No reads found with minimum mapping quality")
   }
   rds.counts
 }
@@ -194,6 +194,7 @@ subdivideGRanges <- function (x, subsize=100) {
   if (length(x) == 0) {
     return(x)
   }
+  x <- sort(reduce(x))
   gr_list <- lapply(levels(seqnames(x)), function(seqlvl) {
     if (!any(seqnames(x) == seqlvl)) {
       return(GRanges())

@@ -102,6 +102,9 @@ viterbiPath <- function(par,fx.par,data,nstates,stFn,trFn,emFn) {
 }
 
 exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, reltol=1e-4, S=0:4, d=2, goto.cnv=1e-4, goto.normal=1/20, init.phi="norm") {
+  if (!sample.name %in% colnames(rdata)) {
+    stop("sample.name is not a column in rdata.")
+  }
   O <- rdata[[sample.name]]
   if (any(O != round(O) | O < 0)) {
     stop("Sample counts must be non-negative integers")
@@ -113,10 +116,16 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
     stop("The normal state, d, must be one of the possible copy states in S")
   } 
   if (!(all(X.names %in% colnames(rdata)))) {
-    stop("X.names must be variable names in rdata")
+    stop("all X.names must be columns in rdata")
+  }
+  if (length(rdata) != 1) {
+    stop("The current rdata argument has ranges over the following chromosomes/spaces: ",paste(names(rdata),collapse=", "),".\n The rdata argument should contain ranged data over a single space.\n You can pass exomeCopy a ranged data from a single space with this syntax: rdata['chr1'].\n See vignette for example of running on multiple chromosomes.")
   }
   if (nrow(rdata) < 100) {
     warning("exomeCopy was tested for thousands of ranges covering a targeted region on a single chromosome.  The results might not be reliable for less than a hundred ranges.")
+  }
+  if (is.unsorted(start(rdata))) {
+    stop("Genomic ranges for ranged data must be sorted.")
   }
   normal.state = which(S==d)
   X <- as.matrix(as.data.frame(values(rdata))[,X.names])

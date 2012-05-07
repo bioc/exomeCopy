@@ -8,7 +8,10 @@
   ranges of nearly equal width.  For an input range of width \code{w} and
   subdividing size \code{s}, it will subdivide the range into
   \code{max(1,floor(w/s))} nearly equal width ranges.   The output is
-  then a new GRanges object.  This function can be used to split the targeted region (such as exons in exome enrichment experiments) into nearly equal width ranges.
+  then a new GRanges object.  This function can be used to split the
+  targeted region (such as exons in exome enrichment experiments) into
+  nearly equal width ranges.  The ranges will be sorted and reduced if
+  they are not already so.
 }
 \usage{
   subdivideGRanges(x,subsize=100)
