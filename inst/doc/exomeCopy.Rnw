@@ -27,7 +27,7 @@ options(width = 70)
 \maketitle
 
 \begin{abstract}
-  \exomeCopy is an R package implementing a hidden Markov model for predicting copy number variants (CNVs) from exome sequencing experiments without paired control experiments as in tumor/normal sequencing.\footnote{The model implemented in this package is described in \citep{Love2011Modeling}.  R packages which can be used for CNV detection in whole genome or tumor/normal paired exome sequencing data include \textsf{ReadDepth} and \textsf{ExomeCNV} respectively, available on CRAN.}  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy number and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
+  \exomeCopy is an R package implementing a hidden Markov model for predicting copy number variants (CNVs) from exome sequencing experiments without paired control experiments as in tumor/normal sequencing.  It models read counts in genomic ranges using negative binomial emission distributions depending on a hidden state of the copy number and on positional covariates such as GC-content and background read depth.  Normalization and segmentation are performed simultaneously, eliminating the need for preprocessing of the raw read counts.
 \end{abstract}
 
 \tableofcontents
@@ -42,15 +42,15 @@ The \exomeCopy package was designed to address the following situation:
   \item Individual samples can be more or less correlated with background read depth and have different dependencies on GC-content.
 \end{itemize}
 
-While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to import experiment data, generate background read depth, and recover CNVs using \exomeCopy. 
+While exome sequencing is not designed for CNV genotyping, it can nevertheless be used for finding CNVs which overlap exons and are not common in the control set.  It can provide an independent data source to be used in combination with higher resolution array-based methods.  In this vignette we show how to import experiment data, generate background read depth, and recover CNVs using \exomeCopy.  The model implemented in this package is described in \citep{Love2011Modeling}.  On CRAN, the R package \textsf{ReadDepth} can be used for CNV detection in whole genome.  The methods in this package are not appropriate for cancer exome sequencing, where amplifications can be high and not necessarily integer values.  The \textsf{ExomeCNV} package on CRAN is designed for tumor/normal paired exome sequencing data.
 
 \texttt{exomeCopy} is designed to run on read counts from consecutive genomic ranges on a single chromosome, as it tries to identify higher or lower read depth relative to a baseline.  We will use a wrapper function to loop the main function over multiple chromosomes and samples.  Then these results can be compiled across chromosomes and samples.
 
 \section{Importing experiment data}
 
-The necessary genomic range information, read counts and positional covariates (background read depth and GC-content) should be stored in a \textit{RangedData} object.  The user must provide genomic ranges of targeted enrichment.  For exome sequencing, one can use exon annotations.  The \exomeCopy package provides the following convenience functions: \texttt{subdivideGRanges} for subdividing the target ranges into nearly-equal sized ranges, \texttt{countBamInGRanges} for counting reads from a BAM file in the target ranges, \texttt{getGCcontent} for calculating GC content in the target ranges, and \texttt{generateBackground} for calculating the median read depth over a set of background samples.
+The necessary genomic range information, sample read counts and positional covariates (background read depth and GC-content) should be stored in a \textit{RangedData} object.  The user must provide genomic ranges of targeted enrichment.  For exome sequencing, one can use exon annotations.  The \exomeCopy package provides the following convenience functions: \texttt{subdivideGRanges} for subdividing the target ranges into nearly-equal sized ranges, \texttt{countBamInGRanges} for counting reads from a BAM file in the target ranges, \texttt{getGCcontent} for calculating GC content in the target ranges, and \texttt{generateBackground} for calculating the median read depth over a set of background samples.
 
-In this vignette we will use a prepackaged \textit{RangedData} object containing real exome sequencing read counts.  To minimize memory size, we demonstrate with toy data how to construct a \textit{RangedData} object from a BED file describing the targeted region, BAM files for the read mapping and a FASTA file for the reference sequence.
+To minimize memory size, we first demonstrate with toy data how to construct a \textit{RangedData} object \texttt{toy.counts} from a BED file describing the targeted region, BAM files for the read mapping and a FASTA file for the reference sequence.  For demonstration of running the main functions, we will use a prepackaged \textit{RangedData} object \texttt{exomecounts} containing real exome sequencing read counts.  We will then simulate CNVs in a \textit{RangedData} object, \texttt{example.counts} and run \texttt{exomeCopy}.
 
 \subsection{Subdividing targeted regions}
 
@@ -97,12 +97,12 @@ Users should make sure the sequence names in the \textit{GRanges} object are the
 bam.file <- system.file("extdata","mapping.bam",package="exomeCopy")
 scanBamHeader(bam.file)[[1]]$targets
 seqlevels(target.sub)
-rdata <- RangedData(space=seqnames(target.sub),ranges=ranges(target.sub))
+toy.counts <- RangedData(space=seqnames(target.sub),ranges=ranges(target.sub))
 sample.df <- data.frame(samples="sample1",bam.files=bam.file,stringsAsFactors=FALSE)
 for (i in 1:nrow(sample.df)) {
-  rdata[[sample.df$samples[i]]] <- countBamInGRanges(sample.df$bam.files[i],target.sub)
+  toy.counts[[sample.df$samples[i]]] <- countBamInGRanges(sample.df$bam.files[i],target.sub)
 }
-rdata
+toy.counts
 @
 
 \subsection{Calculating GC-content}
@@ -110,13 +110,13 @@ rdata
 \exomeCopy can model read counts from samples which are not perfectly correlated with background read depth using GC-content (ratio of G and C bases to total number of bases).  The GC-content of DNA fragments is known to be a factor in the efficiency of high-throughput sequencing.  To obtain the GC-content information, we only need the targeted ranges and a reference FASTA file.
 <<>>=
 reference.file <- system.file("extdata","reference.fa",package="exomeCopy")
-rdata[["GC"]] <- getGCcontent(target.sub, reference.file)
-rdata
+toy.counts[["GC"]] <- getGCcontent(target.sub, reference.file)
+toy.counts
 @ 
 
 \subsection{Exome sequencing data from 1000 Genomes Project}
 
-For demonstrating the use of \exomeCopy, we have provided a sample dataset, \texttt{exomecounts}, of exome sequencing read counts.  The genomic ranges used in this dataset are generated from a small subset of the CCDS regions on chromosome 1 \citep{Pruitt2009Consensus}.  The regions are downloaded from the hg19 tables of the UCSC Genome Browser (\url{http://genome.ucsc.edu/cgi-bin/hgGateway}).  Alternatively, one could use the \textsf{GenomicFeatures} package to download the CCDS regions.  The original CCDS regions are subdivided using \texttt{subdivideGRanges} with default settings as in the example code above.  The CCDS regions are convenient to use as genomic ranges for CNV detection in exome sequencing data, as they are often in the center of the targeted region in exome enrichment protocols and tend to have less variable coverage than the flanking regions.
+For demonstrating the use of \exomeCopy, we have provided a sample dataset, \texttt{1000G.counts}, of exome sequencing read counts.  The genomic ranges used in this dataset are generated from a small subset of the CCDS regions on chromosome 1 \citep{Pruitt2009Consensus}.  The regions are downloaded from the hg19 tables of the UCSC Genome Browser (\url{http://genome.ucsc.edu/cgi-bin/hgGateway}).  Alternatively, one could use the \textsf{GenomicFeatures} package to download the CCDS regions.  The original CCDS regions are subdivided using \texttt{subdivideGRanges} with default settings as in the example code above.  The CCDS regions are convenient to use as genomic ranges for CNV detection in exome sequencing data, as they are often in the center of the targeted region in exome enrichment protocols and tend to have less variable coverage than the flanking regions.
 
 The read counts are taken from exome enriched, paired-end sequencing data of the 1000 Genomes Project for 16 samples of the PUR population \citep{2010Map}.  The BAM read mapping files and descriptions of the experiments are available at the 1000 Genomes Project website (\url{http://www.1000genomes.org/data}).   The ftp addresses used are listed in the file \texttt{1000Genomes\_files.txt} in the \texttt{extdata} directory.  The sample names are included as column names in the provided datatset.
 
@@ -136,38 +136,38 @@ plot(start(exomecounts),exomecounts$HG00551,xlim=c(0.8e6,1.8e6),xlab="genomic po
 
 \subsection{Generating background read depth}
 
-In order to run \exomeCopy, we first generate background read depth.  For demonstration of working with multiple chromosomes, we will copy the chr1 data as a new chromosome.  
+In order to run \exomeCopy, we first generate background read depth.  For demonstration of working with multiple chromosomes, we will copy the chr1 data as a new chromosome ``chr1a''.
 
 <<>>=
 chr1a <- exomecounts
 chr1a.ranges <- ranges(chr1a)
 names(chr1a.ranges) <- "chr1a"
 chr1a <- RangedData(chr1a.ranges,as.data.frame(exomecounts)[,-c(1:4)])
-exomecounts.plus <- c(exomecounts,chr1a)
+example.counts <- c(exomecounts,chr1a)
 @ 
 
 The background is generated by a simple function which performs 3 simple steps:  1) given a vector of names of samples to be used as background, extract the read counts data frame from the \textit{RangedData} object, 2) divide each sample by its mean read count (column means), 3) calculate the median of these normalized read counts (row medians).  The function can also be used to calculate any function across the rows of normalized read counts.  For example, we also show how to calculate the standard deviation of the normalized read counts for a measure of read depth deviation at each range, but we will not use covariate in this vignette.  
 
-Note that if the control set is a mix of males and females, the non-pseudoautosomal portion of chrX will be a mixture of copy counts 1 and 2.  In this case, one should created separate \textit{RangedData} objects for chrX and chrY and run males and females separately with the appropriate expected copy count.
+Note that if the control set is a mix of males and females, the allosome portion of chrX will be a mixture of copy counts 1 and 2.  In this case, one should created separate \textit{RangedData} objects for chrX and chrY and run males and females separately with the appropriate expected copy count.
 
 <<>>=
-exome.samples <- grep("HG.+",colnames(exomecounts.plus),value=TRUE)
-exomecounts.plus[["bg"]] <- generateBackground(exome.samples, exomecounts.plus, median)
-exomecounts.plus[["bg.sd"]] <- generateBackground(exome.samples, exomecounts.plus, sd)
+exome.samples <- grep("HG.+",colnames(example.counts),value=TRUE)
+example.counts[["bg"]] <- generateBackground(exome.samples, example.counts, median)
+example.counts[["bg.sd"]] <- generateBackground(exome.samples, example.counts, sd)
 @ 
 
 We have already removed ranges have zero background coverage, but if we had not we could use the following lines.  If there is zero coverage in the control set, this is most likely a region which is difficult to enrich, and we should not try to infer the copy number here.
 
 <<>>=
-sum(exomecounts.plus[["bg"]] == 0)
-exomecounts.plus <- exomecounts.plus[exomecounts.plus[["bg"]] > 0,]
+summary(example.counts[["bg"]])
+example.counts <- example.counts[example.counts[["bg"]] > 0,]
 @ 
 
 The relationship between read counts and GC-content over the ranges varies across protocols and samples.  It can be roughly approximated per sample using second-order polynomial terms of GC-content.  We store the square of GC-content as a new value column.  Other functions of GC-content could be used as well.  We also store the width of the ranges as a value column.
 
 <<>>=
-exomecounts.plus[["GC.sq"]] <- exomecounts.plus$GC^2
-exomecounts.plus[["width"]] <- width(exomecounts.plus)
+example.counts[["GC.sq"]] <- example.counts$GC^2
+example.counts[["width"]] <- width(example.counts)
 @
 
 \section{Introduction of the model}
@@ -217,13 +217,13 @@ simulateCNV <- function(x,indices,multiply,prob) {
   x[indices] <- x[indices] + multiply * rbinom(length(indices),prob=prob,size=x[indices])
   return(x)
 }
-rdata <- exomecounts.plus
 set.seed(2)
 cnv.probs <- rep(c(.99,.5,.5,.95),each=2)
 cnv.mult <- rep(c(-1,1),each=4)
+cnv.starts <- rep(c(1,301,601,901),each=2)
 for (i in 1:8) {
-  rdata[[exome.samples[i]]] <- simulateCNV(rdata[[exome.samples[i]]],(i*100 + 1):((i+1)*100),multiply=cnv.mult[i],prob=cnv.probs[i])
-  rdata[[exome.samples[i]]] <- simulateCNV(rdata[[exome.samples[i]]],1000 + (i*100 + 1):((i+1)*100),multiply=cnv.mult[i],prob=cnv.probs[i])
+  example.counts[[exome.samples[i]]] <- simulateCNV(example.counts[[exome.samples[i]]],cnv.starts[i]:(cnv.starts[i] + 99),multiply=cnv.mult[i],prob=cnv.probs[i])
+  example.counts[[exome.samples[i]]] <- simulateCNV(example.counts[[exome.samples[i]]],1000 + cnv.starts[i]:(cnv.starts[i] + 99),multiply=cnv.mult[i],prob=cnv.probs[i])
 }
 @ 
 
@@ -234,7 +234,7 @@ for (i in 1:8) {
 We can now run \exomeCopy using the read counts for one of the simulated CNV samples.  Later we will show how to write a simple wrapper function to loop the \texttt{exomeCopy} function over multiple chromosomes and samples.  We specify the possible copy number values with \texttt{S} from 0 to 6 and the expected copy number state with \texttt{d} of 2.
 
 <<>>=
-  fit <- exomeCopy(rdata["chr1"],sample.name=exome.samples[3],X.names=c("bg","GC","GC.sq","width"),S=0:6,d=2)
+  fit <- exomeCopy(example.counts["chr1"],sample.name=exome.samples[3],X.names=c("bg","GC","GC.sq","width"),S=0:6,d=2)
   show(fit)
 @
 
@@ -259,7 +259,7 @@ In order to apply \exomeCopy to a full dataset of multiple chromosomes and sampl
 
 <<>>=
 runExomeCopy <- function(sample.name,seqs) {
-  lapply(seqs,function(seq.name) exomeCopy(rdata[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"),S=0:4,d=2))
+  lapply(seqs,function(seq.name) exomeCopy(example.counts[seq.name],sample.name,X.names=c("bg","GC","GC.sq","width"),S=0:4,d=2))
 }
 @ 
 
@@ -274,13 +274,13 @@ t0 <- as.numeric(proc.time()[3])
 fit.list <- lapply(samples,runExomeCopy,seqs)
 t1 <- as.numeric(proc.time()[3])
 time.elapsed <- as.numeric(t1 - t0)
-paste(round(time.elapsed),"seconds for",length(samples),"samples,",round(sum(width(rdata))/1e3),"kb of target")
-paste("~",round(time.elapsed / 60 / (8 * sum(width(rdata))) * 32e6,1)," minutes for 1 sample, 32 Mb of target",sep="")
+paste(round(time.elapsed),"seconds for",length(samples),"samples,",round(sum(width(example.counts))/1e3),"kb of target")
+paste("~",round(time.elapsed / 60 / (8 * sum(width(example.counts))) * 32e6,1)," minutes for 1 sample, 32 Mb of target",sep="")
 @ 
 
 \subsection{Compiling results, filtering and plotting CNVs}
 
-Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples.  We remove the segments with copy count 2, leaving the predicted CNVs for autosomal ranges.  
+Using \texttt{compileCopyCountSegments} on the list of lists, we can compile the segments across samples into a \textit{RangedData} object.  We remove the segments with copy count 2, leaving the predicted CNVs for autosomal ranges.  
 
 <<>>=
 compiled.segments <- compileCopyCountSegments(fit.list)
@@ -294,19 +294,27 @@ Some non-CNV ranges with too high or low read counts might be predicted to be CN
 \begin{small}
 <<>>=
 CNV.segments[1:6,]
+table(CNV.segments$nranges)
 CNV.segments <- CNV.segments[CNV.segments$nranges > 5,]
 @ 
 \end{small}
+
+To find overlaps within our calls across patients, it helps to convert the \textit{RangedData} object into a \textit{GRanges} object.  We can then use \texttt{findOverlaps} to create a matrix of overlaps between our predicted CNVs in different samples.
+
+<<>>=
+CNV.segments$strand <- "*"
+CNV.segments.granges <- as(CNV.segments,"GRanges")
+CNV.overlaps.matrix <- as.matrix(findOverlaps(CNV.segments.granges,ignoreSelf=TRUE))
+head(CNV.overlaps.matrix)
+@ 
 
 \texttt{plotCompiledCNV} will plot the CNVs for a given sequence across samples if given an object returned by compileCopyCountSegments and the sequence name.
 
 \begin{center}
 <<fig=TRUE>>=
+par(mfrow=c(2,1),mar=c(4,3,2,1))
 cnv.cols <- c("red","orange","black","deepskyblue","blue")
 plotCompiledCNV(CNV.segments=CNV.segments, seq.name="chr1", col=cnv.cols)
-@ 
-
-<<fig=TRUE>>=
 plotCompiledCNV(CNV.segments=CNV.segments, seq.name="chr1a", col=cnv.cols)
 @ 
 \end{center}
