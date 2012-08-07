@@ -109,6 +109,10 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   if (any(O != round(O) | O < 0)) {
     stop("Sample counts must be non-negative integers")
   }
+  if (mean(O == 0) > 0.9) {
+    warning("More than 90% of sample counts are zero, exomeCopy will return NULL")
+    return(NULL)
+  }
   if (any(S!=round(S)|S<0) | any(d!=round(d)|d<0)) {
     stop("S and d must be non-negative integers")
   }
