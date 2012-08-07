@@ -76,13 +76,14 @@ The default setting of \texttt{subdivideGRanges} is to divide an input range int
 @
 \end{center}
 
-Here we demonstrate reading in a targeted region BED file, converting to a \textit{GRanges} object and the result from calling \texttt{subdivideGRanges}.  Note that if the targeted region is read in from a BED file, one should add 1 to the starting position for representation as a \textit{GRanges} object.  
+Here we demonstrate reading in a targeted region BED file, converting to a \textit{GRanges} object and the result from calling \texttt{subdivideGRanges}.  Note that if the targeted region is read in from a BED file, one should add 1 to the starting position for representation as a \textit{GRanges} object.  It is important that the input ranges are sorted and non-overlapping, so we call \texttt{reduce} on the target \textit{GRanges} object. 
 
 <<>>=
 target.file <- system.file("extdata","targets.bed",package="exomeCopy")
 target.df <- read.delim(target.file,header=FALSE,col.names=c("seqname","start","end")) 
 target <- GRanges(seqname=target.df$seqname,IRanges(start=target.df$start+1,end=target.df$end))
 target
+target <- reduce(target, min.gapwidth=0)
 target.sub <- subdivideGRanges(target)
 target.sub
 @ 
@@ -116,7 +117,7 @@ toy.counts
 
 \subsection{Exome sequencing data from 1000 Genomes Project}
 
-For demonstrating the use of \exomeCopy, we have provided a sample dataset, \texttt{1000G.counts}, of exome sequencing read counts.  The genomic ranges used in this dataset are generated from a small subset of the CCDS regions on chromosome 1 \citep{Pruitt2009Consensus}.  The regions are downloaded from the hg19 tables of the UCSC Genome Browser (\url{http://genome.ucsc.edu/cgi-bin/hgGateway}).  Alternatively, one could use the \textsf{GenomicFeatures} package to download the CCDS regions.  The original CCDS regions are subdivided using \texttt{subdivideGRanges} with default settings as in the example code above.  The CCDS regions are convenient to use as genomic ranges for CNV detection in exome sequencing data, as they are often in the center of the targeted region in exome enrichment protocols and tend to have less variable coverage than the flanking regions.
+For demonstrating the use of \exomeCopy, we have provided a sample dataset, \texttt{exomecounts}, of exome sequencing read counts.  The genomic ranges used in this dataset are generated from a small subset of the CCDS regions on chromosome 1 \citep{Pruitt2009Consensus}.  The regions are downloaded from the hg19 tables of the UCSC Genome Browser (\url{http://genome.ucsc.edu/cgi-bin/hgGateway}).  Alternatively, one could use the \textsf{GenomicFeatures} package to download the CCDS regions.  The original CCDS regions are subdivided using \texttt{subdivideGRanges} with default settings as in the example code above.  The CCDS regions are convenient to use as genomic ranges for CNV detection in exome sequencing data, as they are often in the center of the targeted region in exome enrichment protocols and tend to have less variable coverage than the flanking regions.
 
 The read counts are taken from exome enriched, paired-end sequencing data of the 1000 Genomes Project for 16 samples of the PUR population \citep{2010Map}.  The BAM read mapping files and descriptions of the experiments are available at the 1000 Genomes Project website (\url{http://www.1000genomes.org/data}).   The ftp addresses used are listed in the file \texttt{1000Genomes\_files.txt} in the \texttt{extdata} directory.  The sample names are included as column names in the provided datatset.
 
