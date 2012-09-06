@@ -194,6 +194,9 @@ subdivideGRanges <- function (x, subsize=100) {
   if (length(x) == 0) {
     return(x)
   }
+  if (length(subsize) > 1) {
+    stop("The subsize argument should be a single number: the desired width of the subdivided ranges")
+  }
   x <- sort(reduce(x))
   gr_list <- lapply(levels(seqnames(x)), function(seqlvl) {
     if (!any(seqnames(x) == seqlvl)) {
