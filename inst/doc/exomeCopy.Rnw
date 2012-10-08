@@ -32,6 +32,8 @@ options(width = 70)
 
 \tableofcontents
 
+\pagebreak
+
 \section{Introduction}
 
 The \exomeCopy package was designed to address the following situation:
@@ -46,6 +48,33 @@ While exome sequencing is not designed for CNV genotyping, it can nevertheless b
 
 \texttt{exomeCopy} is designed to run on read counts from consecutive genomic ranges on a single chromosome, as it tries to identify higher or lower read depth relative to a baseline.  We will use a wrapper function to loop the main function over multiple chromosomes and samples.  Then these results can be compiled across chromosomes and samples.
 
+\section{Quick start}
+
+Here is an abbreviated example of the code required for importing data, running the model (note: on autosomal regions) and compiling results.  For more details, please read the rest of the vignette and try the help for various functions, e.g. \texttt{?compileCopyCountSegments}.
+
+<<eval=FALSE>>=
+library(exomeCopy)
+target.file <- "targets.bed"
+bam.files <- c("/path/to/file1.bam", "/path/to/file2.bam", "/path/to/file3.bam")
+reference.file <- "/path/to/reference_genome.fa"
+target.df <- read.delim(target.file, header = FALSE)
+target <- GRanges(seqname = target.df[,1], IRanges(start = target.df[,2] + 1, end = target.df[,3]))
+counts <- RangedData(space = seqnames(target), ranges = ranges(target))
+for (i in 1:length(bam.files)) {
+  counts[[bam.files[i]]] <- countBamInGRanges(bam.files[i], target)
+}
+counts[["GC"]] <- getGCcontent(target, reference.file)
+counts[["GC.sq"]] <- example.counts$GC^2
+counts[["bg"]] <- generateBackground(bam.files, counts, median)
+counts[["width"]] <- width(example.counts)
+fit.list <- lapply(bam.files, function(sample.name) {
+  lapply(seqlevels(target), function(seq.name) { 
+    exomeCopy(counts[seq.name], sample.name, X.names = c("bg", "GC", "GC.sq","width"), S = 0:4, d = 2)
+  })
+})
+compiled.segments <- compileCopyCountSegments(fit.list)
+@ 
+
 \section{Importing experiment data}
 
 The necessary genomic range information, sample read counts and positional covariates (background read depth and GC-content) should be stored in a \textit{RangedData} object.  The user must provide genomic ranges of targeted enrichment.  For exome sequencing, one can use exon annotations.  The \exomeCopy package provides the following convenience functions: \texttt{subdivideGRanges} for subdividing the target ranges into nearly-equal sized ranges, \texttt{countBamInGRanges} for counting reads from a BAM file in the target ranges, \texttt{getGCcontent} for calculating GC content in the target ranges, and \texttt{generateBackground} for calculating the median read depth over a set of background samples.
@@ -54,7 +83,7 @@ To minimize memory size, we first demonstrate with toy data how to construct a \
 
 \subsection{Subdividing targeted regions}
 
-\texttt{subdivideGRanges} divides the targeted genomic ranges into a set of ranges of nearly equal width, which exactly cover the original ranges.  The ranges will be sorted and reduced if they are not already so.  While \exomeCopy can use range width as a covariate for modeling read counts, we find it useful to break apart the largest input ranges into multiple ranges of comparable width to the average input range.  \texttt{subdivideGRanges} requires an input \textit{GRanges} object and returns a \textit{GRanges} object.  
+It is possible, but not necessary to subdivide large input ranges into multiple ranges of comparable width to the average input range.  It is not necessary, because \exomeCopy can use range width as a covariate for modeling read counts.  \texttt{subdivideGRanges} divides the targeted genomic ranges into a set of ranges of nearly equal width, which exactly cover the original ranges.  The ranges will be sorted and reduced if they are not already so.    \texttt{subdivideGRanges} requires an input \textit{GRanges} object and returns a \textit{GRanges} object.  
 
 <<>>=
 library(exomeCopy)
