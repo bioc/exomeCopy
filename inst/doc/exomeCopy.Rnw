@@ -56,18 +56,19 @@ Here is an abbreviated example of the code required for importing data, running 
 library(exomeCopy)
 target.file <- "targets.bed"
 bam.files <- c("/path/to/file1.bam", "/path/to/file2.bam", "/path/to/file3.bam")
+sample.names <- c("sample1","sample2","sample3")
 reference.file <- "/path/to/reference_genome.fa"
 target.df <- read.delim(target.file, header = FALSE)
 target <- GRanges(seqname = target.df[,1], IRanges(start = target.df[,2] + 1, end = target.df[,3]))
 counts <- RangedData(space = seqnames(target), ranges = ranges(target))
 for (i in 1:length(bam.files)) {
-  counts[[bam.files[i]]] <- countBamInGRanges(bam.files[i], target)
+  counts[[sample.names[i]]] <- countBamInGRanges(bam.files[i], target)
 }
 counts[["GC"]] <- getGCcontent(target, reference.file)
 counts[["GC.sq"]] <- example.counts$GC^2
-counts[["bg"]] <- generateBackground(bam.files, counts, median)
+counts[["bg"]] <- generateBackground(sample.names, counts, median)
 counts[["width"]] <- width(example.counts)
-fit.list <- lapply(bam.files, function(sample.name) {
+fit.list <- lapply(sample.names, function(sample.name) {
   lapply(seqlevels(target), function(seq.name) { 
     exomeCopy(counts[seq.name], sample.name, X.names = c("bg", "GC", "GC.sq","width"), S = 0:4, d = 2)
   })
