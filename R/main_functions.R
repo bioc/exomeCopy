@@ -1,4 +1,7 @@
 stFn <- function(par,fx.par,data,nstates) {
+  # this is a quick fix to cap transition probabilities near 0 and 1
+  par[1:2] <- pmin(pmax(par[1:2],-100),100)
+
   goto.cnv <- logistic(par[1])
   goto.normal <- logistic(par[2])
   normal.state <- fx.par$normal.state
@@ -14,6 +17,9 @@ stFn <- function(par,fx.par,data,nstates) {
 }
 
 trFn <- function(par,fx.par,data,nstates) {
+  # this is a quick fix to cap transition probabilities near 0 and 1
+  par[1:2] <- pmin(pmax(par[1:2],-100),100)
+
   goto.cnv <- logistic(par[1])
   goto.normal <- logistic(par[2])
   normal.state <- fx.par$normal.state
