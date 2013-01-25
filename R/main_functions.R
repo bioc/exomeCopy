@@ -164,6 +164,14 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   nstates <- length(S)
   if (!fit.var) {
     data <- list(O=O,X=X.full)
+    # added in this test if the loglikelihood is finite at initial setting
+    # otherwise, adjust the beta to simply the intercept
+    finite.test <- is.finite(negLogLike(c(logit(goto.cnv),logit(goto.normal),beta.hat,log(phi.hat)),
+                                        fx.par,data,nstates,stFn,trFn,emFn))
+    if (!finite.test) {
+      beta.hat <- rep(0,length(beta.hat))
+      beta.hat[1] <- mean(data$O)
+    }
     nm.fit <- optim(c(logit(goto.cnv),logit(goto.normal),beta.hat,log(phi.hat)),function(par) negLogLike(par,fx.par,data,nstates,stFn,trFn,emFn),method="Nelder-Mead",control=controls)
   } else {
     Y.full <- cbind(intercept=rep(1,nrow(Y)),scale(Y))
