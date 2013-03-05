@@ -184,7 +184,7 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   beta.hat <- nm.fit$par[3:(2+ncol(X.full))]
   names(beta.hat) <- colnames(X.full)
   mu.hat <- exp(as.numeric(X.full %*% beta.hat))
-  mu.hat[mu.hat < 1] <- 1
+  #mu.hat[mu.hat < 1] <- 1
   if (!fit.var) {
     phi.hat <- exp(nm.fit$par[(3+ncol(X.full))])
     gamma.hat <- NULL
