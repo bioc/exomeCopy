@@ -1,3 +1,7 @@
+version 1.6.0: (2013-03-05)
+
+- switched from X*beta to exp(X*beta) for modeling the expected read depth
+
 version 1.2.0: (2012-02-26)
 
 - support for multisample projects: distribute sample segmentation across workstations, compile results and plot CNVs across samples (see vignette for a reworked example)

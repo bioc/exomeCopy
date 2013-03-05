@@ -53,15 +53,15 @@ emFn <- function(par,fx.par,data,nstates) {
   d <- fx.par$d
   fit.var <- fx.par$fit.var
   beta <- par[3:(2+ncol(data$X))]
-  mu <- data$X %*% beta
-  mu[mu < 1] <- 1
+  mu <- exp(data$X %*% beta)
+  #mu[mu < 1] <- 1
   if (!fit.var) {
     phi <- exp(par[(3+ncol(data$X))])
     phi <- max(1e-6,phi)
     phi <- min(phi,1e4)
   } else {
     gamma <- par[(3+ncol(data$X)):length(par)]
-    phi <- data$Y %*% gamma
+    phi <- exp(data$Y %*% gamma)
     phi[phi < 1e-6] <- 1e-6
     phi[phi > 1e4] <- 1e4
   }
@@ -149,11 +149,11 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   }
   controls <- list(reltol=reltol,maxit=10000)
   X.full <- cbind(intercept=rep(1,nrow(X)),scale(X))
-  lmfit <- lm(O ~ X.full + 0)
+  lmfit <- lm(log(O+.1) ~ X.full + 0)
   beta.hat <- lmfit$coefficients
   names(beta.hat) <- colnames(X.full)
   if (init.phi == "norm") {
-    phi.hat <- (var(lmfit$residuals) - mean(O))/mean(O)^2
+    phi.hat <- (var(O - exp(lmfit$fitted)) - mean(O))/mean(O)^2
   } else if (init.phi == "counts") { 
     phi.hat <- (var(O)-mean(O))/mean(O)^2
   }
@@ -169,13 +169,13 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
                              fx.par,data,nstates,stFn,trFn,emFn))
     if (!finite.test) {
       beta.hat <- rep(0,length(beta.hat))
-      beta.hat[1] <- mean(data$O)
+      beta.hat[1] <- log(mean(data$O)+.1)
     }
     nm.fit <- optim(c(logit(goto.cnv),logit(goto.normal),beta.hat,log(phi.hat)),function(par) negLogLike(par,fx.par,data,nstates,stFn,trFn,emFn),method="Nelder-Mead",control=controls)
   } else {
     Y.full <- cbind(intercept=rep(1,nrow(Y)),scale(Y))
     data <- list(O=O,X=X.full,Y=Y.full)
-    gamma.hat <- c(phi.hat,rep(0,ncol(Y)))
+    gamma.hat <- c(log(phi.hat),rep(0,ncol(Y)))
     nm.fit <- optim(c(logit(goto.cnv),logit(goto.normal),beta.hat,gamma.hat),function(par) negLogLike(par,fx.par,data,nstates,stFn,trFn,emFn),method="Nelder-Mead",control=controls)
   }
   goto.cnv.hat <- logistic(nm.fit$par[1])
@@ -183,7 +183,7 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   A <- trFn(nm.fit$par[1:2],fx.par,data,nstates) 
   beta.hat <- nm.fit$par[3:(2+ncol(X.full))]
   names(beta.hat) <- colnames(X.full)
-  mu.hat <- as.numeric(X.full %*% beta.hat)
+  mu.hat <- exp(as.numeric(X.full %*% beta.hat))
   mu.hat[mu.hat < 1] <- 1
   if (!fit.var) {
     phi.hat <- exp(nm.fit$par[(3+ncol(X.full))])
@@ -192,7 +192,7 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   } else {
     gamma.hat <- nm.fit$par[(3+ncol(X.full)):length(nm.fit$par)]
     names(gamma.hat) <- colnames(Y.full)
-    phi.hat <- as.numeric(Y.full %*% gamma.hat)
+    phi.hat <- exp(as.numeric(Y.full %*% gamma.hat))
     phi.hat[phi.hat < 1e-6] <- 1e-6
     type="exomeCopyVar"
   }

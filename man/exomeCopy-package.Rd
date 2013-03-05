@@ -17,8 +17,6 @@
   \tabular{ll}{
     Package: \tab exomeCopy\cr
     Type: \tab Package\cr
-    Version: \tab 1.5.4\cr
-    Date: \tab 2013-01-25\cr
     License: \tab GPL (>= 2)\cr
     LazyLoad: \tab yes\cr
     Imports: \tab BiocGenerics \cr

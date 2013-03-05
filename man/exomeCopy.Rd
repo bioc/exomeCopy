@@ -92,7 +92,7 @@ init.phi="norm")
   sample must be provided before running the algorithm.
 
   The emission probabilities are given as a negative binomial
-  distribution using positional covariates, such as background read
+  distribution using positional covariates, such as log background read
   depth, quadratic terms for GC-content, and range width, which are
   stored in a matrix \eqn{X}.  Optionally, for fitting the variance of the
   distribution, the standard deviation and/or variance of the background
@@ -106,8 +106,8 @@ init.phi="norm")
 
   The mean parameter \eqn{\mu_{ti}}{mu_ti} is given by:
 
-  \deqn{ \mu_{ti} = \frac{S_i}{d} ( x_{t*} \vec{\beta} ) }{ mu_ti
-  = (S_i / d)(x_t* beta)}
+  \deqn{ \mu_{ti} = \frac{S_i}{d} e^{( x_{t*} \vec{\beta} )} }{ mu_ti
+  = (S_i / d) e^(x_t* beta)}
 
   Here \eqn{S_i} is the i-th possible copy number state, \eqn{d} is the
   expected background copy number (d = 2 for diploid sequence), and
@@ -125,7 +125,7 @@ init.phi="norm")
 
   where
 
-  \deqn{ \phi_{t} = y_{t*} \vec{\gamma} }{ phi_t = y_t* gamma }
+  \deqn{ \log(\phi_{t}) = y_{t*} \vec{\gamma} }{ log(phi_t) = y_t* gamma }
 
   or a small positive number if this is less than zero.
   
@@ -191,19 +191,17 @@ init.phi="norm")
 
 m <- 5000
 rdata <- RangedData(IRanges(start=0:(m-1)*100+1,width=100),
-space=rep("chr1",m), universe="hg19", bg=rexp(m,1), bg.sd=rexp(m,1),
-gc=rnorm(m,50,10))  
+space=rep("chr1",m), universe="hg19", log.bg=rnorm(m), log.bg.var=rnorm(m),
+gc=runif(m,30,50))  
 
 ## create read depth distributional parameters mu and phi
 rdata$gc.sq <- rdata$gc^2
-X <- cbind(bg=rdata$bg,gc=rdata$gc,gc.sq=rdata$gc.sq)
-Y <- cbind(bg.sd=rdata$bg.sd)
-beta <- c(20,10,2,-.01)
-gamma <- c(.1,.05)
-rdata$mu <- beta[1] + scale(X) \%*\% beta[2:4]
-rdata$mu[rdata$mu<1e-8] <- 1e-8
-rdata$phi <- gamma[1] + scale(Y) \%*\% gamma[2]
-rdata$phi[rdata$phi<1e-8] <- 1e-8
+X <- cbind(bg=rdata$log.bg,gc=rdata$gc,gc.sq=rdata$gc.sq)
+Y <- cbind(bg.sd=rdata$log.bg.var)
+beta <- c(5,1,.01,-.01)
+gamma <- c(-3,.1)
+rdata$mu <- exp(beta[1] + scale(X) \%*\% beta[2:4])
+rdata$phi <- exp(gamma[1] + scale(Y) \%*\% gamma[2])
 
 ## create observed counts with simulated heterozygous duplication
 cnv.nranges <- 200
@@ -213,7 +211,7 @@ O[bounds] <- O[bounds] + rbinom(cnv.nranges,prob=0.5,size=O[bounds])
 rdata[["sample1"]] <- O
 
 ## run exomeCopy() and list segments
-fit <- exomeCopy(rdata,"sample1",X.names=c("bg","gc","gc.sq"))
+fit <- exomeCopy(rdata,"sample1",X.names=c("log.bg","gc","gc.sq"))
 
 ## see man page for copyCountSegments() for summary of
 ## the predicted segments of constant copy count, and
