@@ -14,16 +14,6 @@
 }
 \details{
 
-  \tabular{ll}{
-    Package: \tab exomeCopy\cr
-    Type: \tab Package\cr
-    License: \tab GPL (>= 2)\cr
-    LazyLoad: \tab yes\cr
-    Imports: \tab BiocGenerics \cr
-    Depends: \tab methods, graphics, IRanges, GenomicRanges, Rsamtools \cr
-    Suggests: \tab Biostrings\cr
-  }
-
   exomeCopy fits a hidden Markov model to observed read counts using
   covariates.  It returns the Viterbi path, the most likely path of
   hidden states, which is the predicted copy count at each window.
@@ -34,9 +24,6 @@
   for an example of how to prepare input data for \code{exomeCopy}, how
   to loop the function over multiple chromosomes and samples, and how to
   extract the resulting predicted CNVs.  
-}
-\author{
-  Michael Love <love@molgen.mpg.de>
 }
 \references{
   Love, Michael I.; Mysickova, Alena; Sun, Ruping; Kalscheuer, Vera;
