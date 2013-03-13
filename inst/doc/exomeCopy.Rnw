@@ -21,7 +21,7 @@ options(width = 70)
 
 \title{Copy number variant detection in exome sequencing data using \exomeCopy}
 \author{Michael Love\\
-\texttt{love@molgen.mpg.de}}
+\texttt{michaelisaiahlove@gmail.com}}
 \date{\today}
 
 \maketitle
