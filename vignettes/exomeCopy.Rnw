@@ -207,7 +207,7 @@ example.counts[["width"]] <- width(example.counts)
  
 \exomeCopy models the sample read counts on one chromosome, $O$, as emitted observations of a hidden Markov model (HMM), where the hidden state is the copy number of the sample.  The emission distributions $f$ are modeled with negative binomial distributions, as the read counts from high-throughput sequencing are often overdispersed for the Poisson distribution.  
 
-$$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi) $$
+$$ O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi) $$
 
 $$ \mu_{ti} = \frac{S_i}{d} e^{( x_{t*} \beta )} $$
 
@@ -237,7 +237,7 @@ $\gamma$ & the fitted coefficients for estimating $\phi$  \\
 
 The base model uses a scalar estimate for the dispersion parameter $\phi$ (equivalent to 1/\texttt{size} in the function \texttt{dnbinom}).  An extension of this model also tries to fit the variance using positional information such as the log variance of the background read depth stored in a matrix $Y$.
 
-$$ f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi_{t}) $$
+$$ O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi_{t}) $$
 
 $$ \log(\phi_{t}) = y_{t*} \gamma $$
   

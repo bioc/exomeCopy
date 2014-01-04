@@ -102,7 +102,7 @@ init.phi="norm")
   For the observed count at range \eqn{t}, \eqn{O_t}, the emission
   probability is given by:
 
-  \deqn{f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi)}{f = NB(O_t, mu_ti, phi)}
+  \deqn{O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi)}{O_t ~ f_NB(mu_ti, phi)}
 
   The mean parameter \eqn{\mu_{ti}}{mu_ti} is given by:
 
@@ -118,10 +118,7 @@ init.phi="norm")
   number if the value is less than zero.
 
   For exomeCopyVar, which also fits the variance, the emission
-  probability is given by:
-
-  \deqn{f \sim  \textrm{NB}(O_t, \mu_{ti}, \phi_{t})}{f = NB(O_t, mu_ti,
-  phi_t)}
+  probability includes a location-dependent dispersion parameter.
 
   where
 
