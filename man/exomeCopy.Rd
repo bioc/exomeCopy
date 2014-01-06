@@ -102,7 +102,7 @@ init.phi="norm")
   For the observed count at range \eqn{t}, \eqn{O_t}, the emission
   probability is given by:
 
-  \deqn{O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi)}{O_t ~ f_NB(mu_ti, phi)}
+  \deqn{O_t \sim \textrm{NB}(\mu_{ti}, \phi)}{O_t ~ NB(mu_ti, phi)}
 
   The mean parameter \eqn{\mu_{ti}}{mu_ti} is given by:
 

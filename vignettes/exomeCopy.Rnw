@@ -205,9 +205,9 @@ example.counts[["width"]] <- width(example.counts)
 
 \section{Introduction of the model}
  
-\exomeCopy models the sample read counts on one chromosome, $O$, as emitted observations of a hidden Markov model (HMM), where the hidden state is the copy number of the sample.  The emission distributions $f$ are modeled with negative binomial distributions, as the read counts from high-throughput sequencing are often overdispersed for the Poisson distribution.  
+\exomeCopy models the sample read counts on one chromosome, $O$, as emitted observations of a hidden Markov model (HMM), where the hidden state is the copy number of the sample.  The emission distributions are modeled with negative binomial distributions, as the read counts from high-throughput sequencing are often overdispersed for the Poisson distribution.  
 
-$$ O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi) $$
+$$ O_t \sim  \textrm{NB}(\mu_{ti}, \phi) $$
 
 $$ \mu_{ti} = \frac{S_i}{d} e^{( x_{t*} \beta )} $$
 
@@ -221,7 +221,6 @@ The coefficients $\beta$ are fit by the model, using the forward equations to as
 \begin{tabular}{ll}
 \hline
 $O_t$ & observed count of reads in the $t$-th genomic range \\
-$f$ & the emission distribution for read counts \\
 $\mu_{ti}$ & the mean parameter for $f$ at range $t$ in copy state $i$  \\
 $\phi$ & the dispersion parameter for $f$ \\
 $S_i$ & the copy number for state $i$ ($S_i \in \{ 0,1,2,\dots \}$) \\
@@ -237,7 +236,7 @@ $\gamma$ & the fitted coefficients for estimating $\phi$  \\
 
 The base model uses a scalar estimate for the dispersion parameter $\phi$ (equivalent to 1/\texttt{size} in the function \texttt{dnbinom}).  An extension of this model also tries to fit the variance using positional information such as the log variance of the background read depth stored in a matrix $Y$.
 
-$$ O_t \sim  f_{\textrm{NB}}(\mu_{ti}, \phi_{t}) $$
+$$ O_t \sim \textrm{NB}(\mu_{ti}, \phi_{t}) $$
 
 $$ \log(\phi_{t}) = y_{t*} \gamma $$
   
