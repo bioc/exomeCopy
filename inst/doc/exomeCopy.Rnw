@@ -65,10 +65,10 @@ for (i in 1:length(bam.files)) {
   counts[[sample.names[i]]] <- countBamInGRanges(bam.files[i], target)
 }
 counts[["GC"]] <- getGCcontent(target, reference.file)
-counts[["GC.sq"]] <- example.counts$GC^2
+counts[["GC.sq"]] <- counts$GC^2
 counts[["bg"]] <- generateBackground(sample.names, counts, median)
 counts[["log.bg"]] <- log(counts[["bg"]] + .1)
-counts[["width"]] <- width(example.counts)
+counts[["width"]] <- width(counts)
 fit.list <- lapply(sample.names, function(sample.name) {
   lapply(seqlevels(target), function(seq.name) { 
     exomeCopy(counts[seq.name], sample.name, X.names = c("log.bg", "GC", "GC.sq","width"), S = 0:4, d = 2)
