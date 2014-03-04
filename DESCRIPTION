@@ -16,4 +16,4 @@ LazyLoad: yes
 Imports: stats4, methods
 Depends: IRanges, GenomicRanges, Rsamtools
 Suggests: Biostrings
-biocViews: CopyNumberVariation, Sequencing, Sequencing, Genetics
+biocViews: CopyNumberVariation, Sequencing, Genetics
