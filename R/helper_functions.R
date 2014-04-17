@@ -14,7 +14,8 @@ getGCcontent <- function(target, reference.file) {
 }
 
 generateBackground <- function(sample.names, rdata, fn=median) {
-  C <- as.data.frame(unlist(values(rdata)[,colnames(rdata) %in% sample.names]))
+  df <- as.data.frame(rdata)
+  C <- df[,colnames(df) %in% sample.names]
   C.norm <- sweep(C,2,colMeans(C),"/")
   apply(C.norm,1,fn)
 }
