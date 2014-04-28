@@ -174,7 +174,9 @@ In order to run \exomeCopy, we first generate background read depth.  For demons
 chr1a <- exomecounts
 chr1a.ranges <- ranges(chr1a)
 names(chr1a.ranges) <- "chr1a"
-chr1a <- RangedData(chr1a.ranges,as.data.frame(exomecounts)[,-c(1:4)])
+chr1a <- RangedData(chr1a.ranges, as.data.frame(exomecounts)[,-c(1:4)])
+# remove some columns added by RangedData()
+chr1a <- chr1a[,colnames(chr1a) %in% colnames(exomecounts)]
 example.counts <- c(exomecounts,chr1a)
 @ 
 
