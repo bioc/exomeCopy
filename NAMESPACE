@@ -1,7 +1,7 @@
 useDynLib(exomeCopy, .registration = TRUE)
 importFrom(methods,show)
 importFrom(stats4, plot)
-import(IRanges,GenomicRanges,Rsamtools)
+import(IRanges,GenomicRanges,Rsamtools,GenomeInfoDb)
 
 export(subdivideGRanges,
        countBamInGRanges,

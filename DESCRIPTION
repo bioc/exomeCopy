@@ -1,7 +1,7 @@
 Package: exomeCopy
 Type: Package
 Title: Copy number variant detection from exome sequencing read depth
-Version: 1.11.2
+Version: 1.11.3
 Date: 2013-01-25
 Author: Michael Love
 Maintainer: Michael Love <michaelisaiahlove@gmail.com>
@@ -13,7 +13,7 @@ Description: Detection of copy number variants (CNV) from exome
         of constant copy count.
 License: GPL (>= 2)
 LazyLoad: yes
-Imports: stats4, methods
+Imports: stats4, methods, GenomeInfoDb
 Depends: IRanges, GenomicRanges, Rsamtools
 Suggests: Biostrings
 biocViews: CopyNumberVariation, Sequencing, Genetics
