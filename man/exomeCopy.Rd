@@ -210,6 +210,11 @@ rdata[["sample1"]] <- O
 ## run exomeCopy() and list segments
 fit <- exomeCopy(rdata,"sample1",X.names=c("log.bg","gc","gc.sq"))
 
+# an example call with variance fitting.
+# see paper: this does not necessarily improve the fit
+fit <- exomeCopy(rdata,"sample1",X.names=c("log.bg","gc","gc.sq"),
+                 Y.names="log.bg",fit.var=TRUE)
+
 ## see man page for copyCountSegments() for summary of
 ## the predicted segments of constant copy count, and
 ## for plot.ExomeCopy() for plotting fitted objects
