@@ -338,7 +338,7 @@ To find overlaps within our calls across patients, it helps to convert the \text
 <<>>=
 CNV.segments$strand <- "*"
 CNV.segments.granges <- as(CNV.segments,"GRanges")
-CNV.overlaps.matrix <- as.matrix(findOverlaps(CNV.segments.granges,ignoreSelf=TRUE))
+CNV.overlaps.matrix <- as.matrix(findOverlaps(CNV.segments.granges,drop.self=TRUE))
 head(CNV.overlaps.matrix)
 @ 
 
