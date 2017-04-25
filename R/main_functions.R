@@ -107,11 +107,11 @@ viterbiPath <- function(par,fx.par,data,nstates,stFn,trFn,emFn) {
   return(viterbi.call$path + 1)
 }
 
-exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, reltol=1e-4, S=0:4, d=2, goto.cnv=1e-4, goto.normal=1/20, init.phi="norm") {
-  if (!sample.name %in% colnames(rdata)) {
-    stop("sample.name is not a column in rdata.")
+exomeCopy <- function(gr, sample.name, X.names, Y.names, fit.var=FALSE, reltol=1e-4, S=0:4, d=2, goto.cnv=1e-4, goto.normal=1/20, init.phi="norm") {
+  if (!sample.name %in% colnames(mcols(gr))) {
+    stop("sample.name is not a metadata column in gr.")
   }
-  O <- rdata[[sample.name]]
+  O <- mcols(gr)[[sample.name]]
   if (any(O != round(O) | O < 0)) {
     stop("Sample counts must be non-negative integers")
   }
@@ -125,26 +125,26 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   if (!all(d %in% S)) {
     stop("The normal state, d, must be one of the possible copy states in S")
   } 
-  if (!(all(X.names %in% colnames(rdata)))) {
-    stop("all X.names must be columns in rdata")
+  if (!(all(X.names %in% colnames(mcols(gr))))) {
+    stop("all X.names must be columns in gr")
   }
-  if (length(rdata) != 1) {
-    stop("The current rdata argument has ranges over the following chromosomes/spaces: ",paste(names(rdata),collapse=", "),".\n The rdata argument should contain ranged data over a single space.\n You can pass exomeCopy a ranged data from a single space with this syntax: rdata['chr1'].\n See vignette for example of running on multiple chromosomes.")
+  if (length(seqlevelsInUse(gr)) != 1) {
+    stop("The current gr argument has ranges over the following chromosomes: ",paste(seqlevelsInUse(gr),collapse=", "),".\n The gr argument should contain ranges over a single chromosome.\n You can pass exomeCopy a GRanges object with ranges from a single chromosome with this syntax: gr[seqnames(gr) == 'chr1'].\n See vignette for example of running on multiple chromosomes.")
   }
-  if (nrow(rdata) < 100) {
+  if (length(gr) < 100) {
     warning("exomeCopy was tested for thousands of ranges covering a targeted region on a single chromosome.  The results might not be reliable for less than a hundred ranges.")
   }
-  if (is.unsorted(start(rdata))) {
-    stop("Genomic ranges for ranged data must be sorted.")
+  if (is.unsorted(gr)) {
+    stop("Genomic ranges in gr must be sorted.")
   }
   normal.state = which(S==d)
-  X <- as.matrix(as.data.frame(values(rdata))[,X.names])
+  X <- as.matrix(mcols(gr)[,X.names,drop=FALSE])
   colnames(X) <- X.names
   if (fit.var) {
-    if (!(all(Y.names %in% colnames(rdata)))) {
-      stop("Y.names must be variable names in rdata")
+    if (!(all(Y.names %in% colnames(mcols(gr))))) {
+      stop("Y.names must be metadata column names in gr")
     }
-    Y <- as.matrix(as.data.frame(values(rdata))[,Y.names])
+    Y <- as.matrix(mcols(gr)[,Y.names,drop=FALSE])
     colnames(Y) <- Y.names
   }
   controls <- list(reltol=reltol,maxit=10000)
@@ -200,6 +200,6 @@ exomeCopy <- function(rdata, sample.name, X.names, Y.names, fit.var=FALSE, relto
   emit.probs <- emFn(nm.fit$par,fx.par,data,nstates)
   log.odds <- log(emit.probs[cbind(path,seq(path))]+1e-6) - log(emit.probs[normal.state,]+1e-6)
   final.par <- list(goto.cnv=goto.cnv.hat,goto.normal=goto.normal.hat,beta=beta.hat,gamma=gamma.hat,phi=phi.hat)
-  fit <- new("ExomeCopy",sample.name=sample.name,type=type,path=Rle(path),ranges=ranges(rdata),O.norm=as.numeric(O/mu.hat),log.odds=log.odds,fx.par=fx.par,init.par=init.par,final.par=final.par,counts=nm.fit$counts,convergence=nm.fit$convergence,nll=nm.fit$value) 
+  fit <- new("ExomeCopy",sample.name=sample.name,type=type,path=Rle(path),ranges=granges(gr),O.norm=as.numeric(O/mu.hat),log.odds=log.odds,fx.par=fx.par,init.par=init.par,final.par=final.par,counts=nm.fit$counts,convergence=nm.fit$convergence,nll=nm.fit$value) 
   return(fit)
 }

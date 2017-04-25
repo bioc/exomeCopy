@@ -19,7 +19,7 @@
   }
 }
 \value{
-  A RangedData object of all segments across samples and chromosomes.
+  A GRanges object of all segments across samples and chromosomes.
   }
 \examples{
   example(exomeCopy)

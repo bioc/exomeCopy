@@ -79,9 +79,6 @@
   ## BAM file included in Rsamtools package
   bam.file <- system.file("extdata", "mapping.bam", package="exomeCopy")
 
-  ## create RangedData object to store read counts
-  rdata <- RangedData(space=seqnames(target.sub),ranges=ranges(target.sub))
-
   ## extract read counts from the BAM file in these genomic ranges
-  rdata[["sample"]] <- countBamInGRanges(bam.file,target.sub)
+  mcols(target.sub)$sample <- countBamInGRanges(bam.file,target.sub)
 }

@@ -13,9 +13,9 @@ getGCcontent <- function(target, reference.file) {
   as.vector(ifelse(all.count==0,NA,GC.count/all.count))
 }
 
-generateBackground <- function(sample.names, rdata, fn=median) {
-  df <- as.data.frame(rdata)
-  C <- df[,colnames(df) %in% sample.names]
+generateBackground <- function(sample.names, gr, fn=median) {
+  df <- mcols(gr)
+  C <- as.data.frame(df[,colnames(df) %in% sample.names])
   C.norm <- sweep(C,2,colMeans(C),"/")
   apply(C.norm,1,fn)
 }
@@ -32,24 +32,24 @@ copyCountSegments <- function(object) {
   }
   targeted.bp <- sapply(1:length(range.start),function(i) sum(width(object@ranges)[[1]][range.start[i]:range.end[i]]))
   log.odds <- sapply(1:length(range.start),function(i) sum(object@log.odds[range.start[i]:range.end[i]]))
-  RangedData(
-             IRanges(start=start(object@ranges)[[1]][range.start],
-             end=end(object@ranges)[[1]][range.end]),
-             space=space(object@ranges)[1],
-             universe=universe(object@ranges),
-             copy.count=object@fx.par$S[as.numeric(x[range.start])],
-             log.odds=round(log.odds,2),
-             nranges=(range.end - range.start + 1),
-             targeted.bp=targeted.bp,
-             sample.name=object@sample.name)
+  gr <- GRanges(seqnames(object@ranges)[1],
+                IRanges(start=start(object@ranges)[range.start],
+                        end=end(object@ranges)[range.end]),
+                copy.count=object@fx.par$S[as.numeric(x[range.start])],
+                log.odds=round(log.odds,2),
+                nranges=(range.end - range.start + 1),
+                targeted.bp=targeted.bp,
+                sample.name=object@sample.name)
+  genome(gr) <- genome(object@ranges)
+  gr
 }
 
 compileCopyCountSegments <- function(fit.list) {
   sample.res <- lapply(fit.list,function(seq.list) {
     seq.res <- lapply(seq.list, copyCountSegments)
-    do.call(rbind,seq.res)
+    do.call(c,unname(seq.res))
   })
-  do.call(rbind,sample.res)
+  do.call(c,unname(sample.res))
 }
 
 plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exomeCopy predicted segments",xlab="genomic position",ylab="normalized read count",xlim=NULL,ylim=NULL,cex=1,lwd=4,...) {
@@ -62,14 +62,14 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
     cols[x@fx.par$S > x@fx.par$d] <- "blue"
   }
   if (is.null(ylim)) ylim <- c(0,5*mean(x@O.norm))
-  if (is.null(xlim)) xlim <- c(start(range(x@ranges))[[1]],end(range(x@ranges))[[1]])
+  if (is.null(xlim)) xlim <- c(start(range(x@ranges)),end(range(x@ranges)))
   plot(0,0,type="n",xlab=xlab,ylab=ylab,xlim=xlim,ylim=ylim,main=main,...)
   if (points) {
-    points(mid(x@ranges[[1]]),x@O.norm*x@fx.par$d,col=cols[as.numeric(x@path)],cex=cex)
+    points(mid(ranges(x@ranges)),x@O.norm*x@fx.par$d,col=cols[as.numeric(x@path)],cex=cex)
   }
   ccs <- copyCountSegments(x)
-  segments(start(ranges(ccs))[[1]],ccs$copy.count,
-           end(ranges(ccs))[[1]],ccs$copy.count,lwd=lwd,
+  segments(start(ccs),ccs$copy.count,
+           end(ccs),ccs$copy.count,lwd=lwd,
            col=cols[match(ccs$copy.count,x@fx.par$S)])
   if (show.legend) {
     legend("topright",col=rev(cols),pch=1,legend=rev(x@fx.par$S),title="copy count",bg="white",cex=.75)
@@ -77,8 +77,8 @@ plot.ExomeCopy <- function (x,points=TRUE,cols=NULL,show.legend=TRUE,main="exome
 }
 
 plotCompiledCNV <- function(CNV.segments, seq.name, xlim=NULL, col=NULL, copy.counts=0:6, normal.state = 2) {
-  CNV.subset <- CNV.segments[CNV.segments$space == seq.name,]
-  seq.range <- range(CNV.subset)[[seq.name]]
+  CNV.subset <- CNV.segments[seqnames(CNV.segments) == seq.name]
+  seq.range <- range(CNV.subset)
   if (is.null(xlim)) {
     xlim <- c(start(seq.range),end(seq.range))
   }
@@ -90,7 +90,7 @@ plotCompiledCNV <- function(CNV.segments, seq.name, xlim=NULL, col=NULL, copy.co
   axis(2,at=1:length(samples),labels=samples,las=2,cex.axis=.6)
   for (i in 1:length(samples)) {
     sample.name <- samples[i]
-    CNV.sample <- CNV.subset[CNV.subset$sample.name == sample.name,]
+    CNV.sample <- CNV.subset[CNV.subset$sample.name == sample.name]
     copy.count.idx <- match(CNV.sample$copy.count,copy.counts)  
     segments(start(CNV.sample),rep(i,length(CNV.sample)),end(CNV.sample),rep(i,length(CNV.sample)),lwd=3,col=col[copy.count.idx])
   }

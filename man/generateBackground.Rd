@@ -9,14 +9,14 @@
   normalized counts.
 }
 \usage{
-  generateBackground(sample.names, rdata, fn=median)
+  generateBackground(sample.names, gr, fn=median)
 }
 \arguments{
   \item{sample.names}{
-    A vector of column names in rdata to be used as background samples
+    A vector of metadata column names in gr to be used as background samples
   }
-  \item{rdata}{
-    A RangedData object containing the read counts
+  \item{gr}{
+    A GRanges object containing the read counts
   }
   \item{fn}{
     The statistic to be applied across the rows of normalized counts. 
@@ -29,9 +29,7 @@
 }
 \examples{
   data(exomecounts)
-  sample.names <- grep("HG.+",colnames(exomecounts),value=TRUE)
-  exomecounts[["bg"]] <- generateBackground(sample.names, exomecounts,
-median) 
-  exomecounts[["bg.sd"]] <- generateBackground(sample.names,
-exomecounts, sd) 
+  sample.names <- grep("HG.+",colnames(mcols(exomecounts)),value=TRUE)
+  exomecounts$bg <- generateBackground(sample.names, exomecounts, median) 
+  exomecounts$bg.sd <- generateBackground(sample.names, exomecounts, sd) 
 }

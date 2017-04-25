@@ -4,12 +4,12 @@
   Plot compiled CNV segments for one sequence/chromosome
 }
 \description{
-  This function takes a RangedData object as produced by
+  This function takes a GRanges object as produced by
   \code{\link{compileCopyCountSegments}} and plots the CNV segments for
   one sequence/chromosomes across the samples with CNV segments.
 
   The segments in the normal state should be removed as shown below in
-  the example to produce a cleaned RangedData object.  See the vignette
+  the example to produce a cleaned GRanges object.  See the vignette
   for a more complete example.
 }
 \usage{
@@ -18,7 +18,7 @@
 }
 \arguments{
   \item{CNV.segments}{
-    A RangedData object as produced by
+    A GRanges object as produced by
   \code{\link{compileCopyCountSegments}} and with normal state removed.
   }
   \item{seq.name}{
@@ -43,8 +43,8 @@
   }
 \examples{
   example(compileCopyCountSegments)
-  CNV.clean <- CNV.segments[CNV.segments$copy.count != 2,]
-  chr.start <- start(range(fit@ranges)[["chr1"]])
-  chr.end <- end(range(fit@ranges)[["chr1"]])
+  CNV.clean <- CNV.segments[CNV.segments$copy.count != 2]
+  chr.start <- start(range(fit@ranges))
+  chr.end <- end(range(fit@ranges))
   plotCompiledCNV(CNV.clean, "chr1", xlim=c(chr.start,chr.end))
 }

@@ -4,7 +4,7 @@
   Segments of identical copy count from exomeCopy
 }
 \description{
-  Unpacks an ExomeCopy object and returns a RangedData object with
+  Unpacks an ExomeCopy object and returns a GRanges object with
   segments of identical predicted copy count in genomic coordinates.
 }
 \usage{
@@ -24,7 +24,7 @@
   not have been generated from the normal state.
 }
 \value{
-  Returns a RangedData object with the predicted copy count, the log
+  Returns a GRanges object with the predicted copy count, the log
   odds of predicted copy count over normal copy count, a combined
   p-value, the number of genomic ranges spanned by the segment, the
   number of targeted basepairs in the segment, and the sample name. 

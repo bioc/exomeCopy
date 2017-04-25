@@ -16,7 +16,7 @@
   to loop the function over multiple chromosomes and samples, and how to
   extract the resulting predicted CNVs.  
 
-  \code{exomeCopy} requires as input a \code{\link{RangedData}} object
+  \code{exomeCopy} requires as input a \code{\link{GRanges}} object
   containing read counts in genomic ranges along with the covariates.
   Some convenience functions are provided for preparing input for
   \code{exomeCopy}: 
@@ -35,25 +35,25 @@
 }
 }
 \usage{
-  exomeCopy(rdata, sample.name, X.names, Y.names, fit.var=FALSE, reltol
+  exomeCopy(gr, sample.name, X.names, Y.names, fit.var=FALSE, reltol
   = 0.0001, S = 0:4, d = 2, goto.cnv = 1e-4, goto.normal = 1/20,
 init.phi="norm")    
 }
 \arguments{
-  \item{rdata}{
-    A RangedData object with the sample counts and positional covariates
+  \item{gr}{
+    A GRanges object with the sample counts and positional covariates
     over the genomic ranges.
   }
   \item{sample.name}{
-    The name of the value column of rdata with the sample read counts.
+    The name of the metadata column of \code{gr} with the sample read counts.
   }
   \item{X.names}{
-    The names of the value columns of rdata with covariates for
+    The names of the metadata columns of \code{gr} with covariates for
   estimating mu. 
   }
   \item{Y.names}{
-    (optional) the names of the value columns of rdata with covariates for
-  estimating phi, only required if fit.var = TRUE. 
+    (optional) the names of the metadata columns of \code{gr} with covariates
+  for estimating phi, only required if fit.var = TRUE. 
   }
   \item{fit.var}{
     A logical, whether the model should fit the overdispersion parameter
@@ -174,7 +174,7 @@ init.phi="norm")
   \code{\link{plot.ExomeCopy}}
   \code{\link{negLogLike}}
   \code{\link{IRanges}}
-  \code{\link{RangedData}}
+  \code{\link{GRanges}}
 }
 \examples{
 
@@ -183,36 +183,36 @@ init.phi="norm")
 ## using real exome sequencing read counts (with simulated CNV) please
 ## see the vignette.
 
-## create RangedData for storing genomic ranges and covariate data
+## create GRanges for storing genomic ranges and covariate data
 ## (background, background stdev, GC-content)
 
 m <- 5000
-rdata <- RangedData(IRanges(start=0:(m-1)*100+1,width=100),
-space=rep("chr1",m), universe="hg19", log.bg=rnorm(m), log.bg.var=rnorm(m),
-gc=runif(m,30,50))  
+gr <- GRanges("chr1", IRanges(start=0:(m-1)*100+1,width=100),
+              log.bg=rnorm(m), log.bg.var=rnorm(m), gc=runif(m,30,50))
+genome(gr) <- "hg19"
 
 ## create read depth distributional parameters mu and phi
-rdata$gc.sq <- rdata$gc^2
-X <- cbind(bg=rdata$log.bg,gc=rdata$gc,gc.sq=rdata$gc.sq)
-Y <- cbind(bg.sd=rdata$log.bg.var)
+gr$gc.sq <- gr$gc^2
+X <- cbind(bg=gr$log.bg,gc=gr$gc,gc.sq=gr$gc.sq)
+Y <- cbind(bg.sd=gr$log.bg.var)
 beta <- c(5,1,.01,-.01)
 gamma <- c(-3,.1)
-rdata$mu <- exp(beta[1] + scale(X) \%*\% beta[2:4])
-rdata$phi <- exp(gamma[1] + scale(Y) \%*\% gamma[2])
+gr$mu <- exp(beta[1] + scale(X) \%*\% beta[2:4])
+gr$phi <- exp(gamma[1] + scale(Y) \%*\% gamma[2])
 
 ## create observed counts with simulated heterozygous duplication
 cnv.nranges <- 200
 bounds <- (round(m/2)+1):(round(m/2)+cnv.nranges)
-O <- rnbinom(nrow(rdata),mu=rdata$mu,size=1/rdata$phi)
+O <- rnbinom(length(gr),mu=gr$mu,size=1/gr$phi)
 O[bounds] <- O[bounds] + rbinom(cnv.nranges,prob=0.5,size=O[bounds])
-rdata[["sample1"]] <- O
+gr$sample1 <- O
 
 ## run exomeCopy() and list segments
-fit <- exomeCopy(rdata,"sample1",X.names=c("log.bg","gc","gc.sq"))
+fit <- exomeCopy(gr,"sample1",X.names=c("log.bg","gc","gc.sq"))
 
 # an example call with variance fitting.
 # see paper: this does not necessarily improve the fit
-fit <- exomeCopy(rdata,"sample1",X.names=c("log.bg","gc","gc.sq"),
+fit <- exomeCopy(gr,"sample1",X.names=c("log.bg","gc","gc.sq"),
                  Y.names="log.bg",fit.var=TRUE)
 
 ## see man page for copyCountSegments() for summary of

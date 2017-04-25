@@ -27,7 +27,7 @@
   sequenced reads counted in their respective genomic ranges.  
 } 
 \usage{data(exomecounts)}
-\format{A RangedData object.}
+\format{A GRanges object.}
 \source{1000 Genomes Project and Consensus Coding Sequence Project}
 \references{
   1000 Genomes Project Consortium. A map of human genome variation from
@@ -44,5 +44,5 @@
 }
 \keyword{datasets}
 \seealso{
-  \code{link{RangedData}}
+  \code{\link{GRanges}}
 }
