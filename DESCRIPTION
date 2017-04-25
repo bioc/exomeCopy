@@ -1,7 +1,7 @@
 Package: exomeCopy
 Type: Package
 Title: Copy number variant detection from exome sequencing read depth
-Version: 1.23.1
+Version: 1.23.2
 Date: 2017-04-25
 Author: Michael Love
 Maintainer: Michael Love <michaelisaiahlove@gmail.com>
@@ -17,5 +17,3 @@ Imports: stats4, methods, GenomeInfoDb
 Depends: IRanges (>= 2.5.27), GenomicRanges (>= 1.23.16), Rsamtools
 Suggests: Biostrings
 biocViews: CopyNumberVariation, Sequencing, Genetics
-NeedsCompilation: yes
-Packaged: 2017-04-25 11:42:40 UTC; hpages
