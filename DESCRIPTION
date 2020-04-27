@@ -1,7 +1,7 @@
 Package: exomeCopy
 Type: Package
 Title: Copy number variant detection from exome sequencing read depth
-Version: 1.33.0
+Version: 1.34.0
 Date: 2017-04-25
 Author: Michael Love
 Maintainer: Michael Love <michaelisaiahlove@gmail.com>
